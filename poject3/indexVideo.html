@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="cn">
+<head>
+	<meta charset="utf-8">
+	<title></title>
+	<script type="text/javascript" src="./js/jquery-3.3.1.min.js"></script>
+	<style type="text/css">
+		.content{
+			width:500px;
+			height:300px;
+			background:red;
+		}
+		.kaic{
+			width:100%;
+			/*display:none;*/
+			position:absolute;
+			z-index:7;
+			margin:-100px 0 0 0;
+			overflow:hidden;
+		}
+		.tiaoguo{
+			width:100px;
+			height:40px;
+			position:absolute;
+			top:0;
+			left:100px;
+			z-index:8;
+		}
+		.dd{
+			position:absolute;
+			z-index:0;
+		}
+	</style>
+</head>
+<body>
+	<button class="tiaoguo">跳过</button>
+	<div class="kaic">
+		<video autoplay id="myvideo" width="100%" type="video/mp4" src="./video/go.mp4" -webkit-playsinline="true" controls></video>
+	</div>
+	<div class="content">123</div>
+	<button class="dd">123</button>
+</body>
+</html>
+<script type="text/javascript">
+	$('.tiaoguo').click(function(){
+		$('.kaic').css('display','none');
+		let video = document.getElementById('myvideo');
+		video.muted = true;
+	});
+
+	// do {
+	//     mPaint.setTextSize(mTextSize);
+	//     Rect rect = new Rect();
+	//     mPaint.getTextBounds("跳过", 0, 2, rect);
+	//     textWidth = rect.right - rect.left;
+	//     textHeight = rect.bottom - rect.top;
+
+	//     if (Math.pow(textWidth / 2, 2) + Math.pow(textHeight / 2, 2) > Math.pow(mCircleRadius, 2)) {
+	//         mTextSize -= 0.5;
+	//     } else {
+	//         break;
+	//     }
+
+	// } while (true);
+
+
+	// //字体的颜色
+	// private int mTextColor = Color.WHITE;
+
+	// mPaint.setColor(mTextColor);
+	// Paint.FontMetrics fontMetrics = mPaint.getFontMetrics();
+	// canvas.drawText("跳过", -textWidth / 2, (-fontMetrics.top - fontMetrics.bottom) / 2, mPaint);
+
+	// private int mCircleStrokeColor = Color.RED;
+
+	// mPaint.setColor(mCircleStrokeColor);
+	// mPaint.setStyle(Paint.Style.STROKE);
+	// mPaint.setStrokeWidth(mStrokeWidth);
+	// mPaint.setStrokeCap(Paint.Cap.ROUND);
+
+	// Path path = new Path();
+	// path.addCircle(0, 0, mCircleRadius, Path.Direction.CW);
+	// canvas.drawPath(path, mPaint);
+
+	// //省略上述Paint设置部分
+
+	// Path path = new Path();
+	// path.addCircle(0, 0, mCircleRadius, Path.Direction.CW);
+
+	// //将此path交给一个PathMeasure对象
+	// PathMeasure pathMeasure = new PathMeasure(path, false);
+	// float length = pathMeasure.getLength();
+	// Path pathDst = new Path();
+	// //mCurrentValue，即为动画某一时刻的值
+	// //getSegment可以获取此path的片段
+	// pathMeasure.getSegment(mCurrentValue * length, length, pathDst, true);
+	// canvas.drawPath(pathDst, mPaint);
+
+	// canvas.save();
+
+	// canvas.rotate(-90);
+
+	// canvas.restore();
+</script>
