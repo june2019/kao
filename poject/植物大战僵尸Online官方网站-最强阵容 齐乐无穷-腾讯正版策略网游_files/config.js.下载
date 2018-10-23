@@ -1,0 +1,23 @@
+configJs={
+"checkRealName":0,  //是否需要实名制  1:是
+"checkYesArea":"",  //是否需要启动专属大区  不为空:是  added by yalizhao 2012-11-26
+"RealNameDelay":0,  //是否需要“稍后注册，直接进入游戏”  1:是
+"sCheckRealNameUrl":"http://commwebgame.game.qq.com/cgi-bin/webgame_login/RealNameRegApp.cgi?sGameKind=pvz", //实名制地址
+"sSaveServerIdUrl":"http://commwebgame.game.qq.com/webgame_login/app/V2.9/saveServer.php?sGameKind=pvz",   //保存最近登陆地址
+"sLoadServerIdUrl":"http://commwebgame.game.qq.com/webgame_login/app/V2.9/loadServer.php?sGameKind=pvz",   //取最近登陆地址
+"sLoginCgiUrl":"http://commwebgame.game.qq.com/cgi-bin/webgame_login/CommLoginApp.cgi?sGameKind=pvz",           //游戏登陆接口地址
+"sFrom":"qzone",                         //渠道参数(默认参数改为qzone)
+"jumpType":0,                       //跳转方式
+"sendType":1,                       //透传方式
+"loginType":1,                       //选区页是否强制登陆
+
+"tplId":6,                             //模板id
+"otherChannelUrl":"",       //选择其它服务器地址
+"IPTypeUrl":"http://commwebgame.game.qq.com/webgame_login/app/V2.9/ip_type.php?sGameKind=pvz",                   //获取用户宽带情况地址
+"handleErrorEventUrl":"http://commwebgame.game.qq.com/webgame_login/app/V2.9/handleErrorEvent.php?sGameKind=pvz", //前端js报警地址
+"sServerID":0,                     //服务器id(适用单服)
+"sGetPTCookieStrUrl":"http://commwebgame.game.qq.com/webgame_login/app/V2.9/getPTCookie.php?sGameKind=pvz" , //获取pt cookie串url
+"sCommConfigUrl":"http://pvz.qq.com/webgame_login/comm_config.js"  //获取web_login下comm_config.js
+}; 
+var commConfigFile = "%3Cscript src='" + configJs["sCommConfigUrl"] + "' type='text/javascript'%3E%3C/script%3E";
+document.write(unescape(commConfigFile));/*  |xGv00|0ec05dc5e13bcf3e4628a79a76954cc1 */

@@ -1,0 +1,237 @@
+/*====================公共样式======================*/
+*{ margin: 0; padding: 0; }
+img { border: 0 none; vertical-align: center; }
+ul, li { list-style-type: none;}
+h1, h2, h3, h4, h5, h6 { font-size: 14px; }
+body, input, select, button, textarea { font-size: 14px; font-family:"微软雅黑";  }	/*设置默认字体*/
+button { cursor: pointer; }
+i, em, cite { font-style: normal; }
+aside section,.body{display:block; width:1000px; margin:0 auto;}
+a, a:link { color: #000; text-decoration: none; }/*设置a标签基本样式与伪类选择器设置*/
+a:visited {}
+a:active, a:hover { text-decoration: none; color:#d00000; }
+a:focus { outline: none; } 
+
+/* 常用字体颜色或者背景着色 */
+.orange { color:#F26E01;}
+
+/* 用于清除浮动的样式 */
+.clear:after {
+	display: block;
+	content: '清除浮动';
+	height: 0;
+	visibility: hidden;
+	clear:both;
+}
+/*====================公共样式======================*
+/*====================主体样式star======================*/
+header{
+	width:100%;
+	height:74          0px;
+	/*border:1px solid green;*/
+}
+main{
+	width:100%;
+	height:1060px;
+	/*border:1px solid red;*/
+	background: #191c26;
+}
+footer{
+	width:100%;
+	height:262px;
+/*	border:1px solid black;*/
+	background: #191c26;
+}
+/*====================主体样式end======================*/
+/*====================头部样式======================*/
+.head_top{
+	width:1000px;
+	height:43px;
+	margin:0 auto;
+	/*border:1px solid red;*/
+}
+.head_top>img{
+	float: left;
+}
+.head_top .bg{
+	width:970px;
+	height:185px;
+	position: absolute;
+	top:30px;
+	left:660px;
+	display: none;
+}
+.head_top:hover>.bg{
+	display:block;
+}
+
+
+.h_tl{
+	width:206px;
+	height:29px;
+	margin:7px 0 0 0px;
+	float: left;
+	border-right:1px solid #d2d7e3;
+}
+.h_tl>img{
+	margin:-10px 0 0 0;
+	height:54px;
+}
+.h_tr{
+	width:18px;
+	height:18px;
+	margin:10px 0px 0 0;
+	position: relative;
+
+	float: right;
+	color:yellowgreen;
+}
+.head_top>a{
+	height:15px;
+	display: block;
+	float: right;
+	line-height:38px;
+
+}
+
+.head_mid{
+	width:100%;
+	height:700px;
+	background: url(../image/未标题-3.png) no-repeat;
+	background-size:100%;
+}
+.head_mid>nav{
+	width:1080px;
+	height:180px;
+	/*border:1px solid black;*/
+	margin:0px 35%;
+	text-shadow:1px 1px 3px white;
+	z-index:2;
+	position: relative;
+
+}
+.head_mid>nav>ul{
+	width:1080px;
+	height:180px;
+	position: relative;
+	top:40px;
+	
+}
+.head_mid>nav>ul>li{
+	float: left;
+	margin:-9px 92px 0 0;
+	font-size:18px;
+	position: relative;
+}
+.head_mid>nav>ul>li .nav2{
+	height:150px;
+	width:150px;
+	position:absolute;
+	top:-30px;
+	left:-40px;
+	text-align:center;
+	background:rgba(12,12,12,0.5);
+	z-index:-1;
+	display:none;
+}
+.head_mid>nav>ul>li:hover>.nav2{
+	display:block;
+
+
+}
+
+.head_mid>nav>ul>li .nav2>li{
+	line-height:30px;
+	font-size:15px;
+	position: relative;
+	z-index:1;
+}
+.head_mid>nav>ul>li .nav2>li>a{
+	color:white;
+	text-shadow:none;
+}
+
+.head_mid>nav>ul>li>a{
+	color:#fff;
+
+}
+
+/*====================头部样式end======================*/
+/*====================底部样式star======================*/
+.foot_top{
+	width:100%;
+	height:30px;
+	background: #1a1a22;
+}
+.foot_top>ul{
+	width:1000px;
+	height:30px;
+	margin:0px auto;
+}
+.foot_top>ul>li{
+	float: left;
+	margin:0 20px 0 0 ;
+}
+.foot_top>ul>li>a{
+	color:#46332e;
+}
+.foot_mid{
+	width:100%;
+	height:252px;
+	position:relative;
+}
+.foot_mid>section{
+	width:340px;
+	height:34px;
+	/*border:1px solid white;*/
+	margin:0 0 0 25%;
+	border-right:1px solid #353a3f;
+}
+.foot_mid>section>a{
+	margin:0 9px 0 0 ;
+}
+.foot_mid>section .bg1{
+	width:166px;
+	height:31px;
+	display:block;
+	background:url(../image/foot_logo_s.png);
+	float: left;
+}
+.foot_mid>section .bg2{
+	width:121px;
+	height:28px;
+	display:block;
+	background:url(../image/pvz-foot-logo.png);
+	float: left;
+}
+.foot_mid>section .bg3{
+	width:25px;
+	height:29px;
+	display:block;
+	background:url(../image/logo01.png);
+	float: left;
+}
+.foot_mid .f_mr{
+	width:660px;
+	height:191px;
+	/*border:1px solid white;*/
+	position:absolute;
+	top:0px;
+	left:44%;	
+}
+.foot_mid .f_mr>a{
+	color:#4c4c44;
+	font-size:10px;
+}
+.foot_mid .f_mr>span {
+	display:block;
+	color:#4c4c44;
+	font-size:13px;
+}
+.foot_mid .f_mr>span>i{
+	
+		float: right;
+		font-size:13px;
+}
+
+/*====================底部样式end======================*/

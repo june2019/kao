@@ -1,0 +1,249 @@
+/*====================公共样式======================*/
+*{ margin: 0; padding: 0; }
+img { border: 0 none; vertical-align: center; }
+ul, li { list-style-type: none;}
+h1, h2, h3, h4, h5, h6 { font-size: 14px; }
+body, input, select, button, textarea { font-size: 14px; font-family:"微软雅黑";  }	/*设置默认字体*/
+button { cursor: pointer; }
+i, em, cite { font-style: normal; }
+aside section,.body{display:block; width:1000px; margin:0 auto;}
+a, a:link { color: #000; text-decoration: none; }/*设置a标签基本样式与伪类选择器设置*/
+a:visited {}
+a:active, a:hover { text-decoration: none; color:#d00000; }
+a:focus { outline: none; } 
+
+/* 常用字体颜色或者背景着色 */
+.orange { color:#F26E01;}
+
+/* 用于清除浮动的样式 */
+.clear:after {
+	display: block;
+	content: '清除浮动';
+	height: 0;
+	visibility: hidden;
+	clear:both;
+}
+/*====================公共样式======================*/
+.top{
+	width:100%;
+	background: #fff;
+	/*border:1px solid black;*/
+
+	
+}
+.logo{
+	width:195px;
+	height:40px;
+	position: relative;
+	left:25%;
+	padding:0 10px 0 0;
+	/*border-right:1px solid #b1b1b1;*/
+	float: left;
+	/*background: url('../image/game-logo.png') no-repeat;
+}*/
+}
+.box{
+		width:600px;
+		height:30px;
+		float: left;
+/*		background: #000;*/
+		position: relative;
+		left:25%;
+		top:10px;
+		border-left:1px solid #b1b1b1;
+}
+.box2{
+	height:30px;
+	background: url('../image/logo.png') no-repeat;
+	float: left;
+	padding:0 0 0 19px;
+	position: relative;
+	left:30%;
+	margin:10px 0 0 0;
+	font-size:13px;
+}
+.left{
+	width:140px;
+	height:1180px;
+	background: #000;
+	float: left;
+}
+.left .nav{
+	width:140px;
+	height:500px;
+	
+	margin:140px 0 0 0;
+}
+.left .nav>li{
+	width:140px;
+	height:100px;
+	/*border:1px solid pink;*/
+	
+	
+}
+
+.left .nav>li>span{
+	width: 28px;
+    height: 28px;
+    margin: 15px auto 8px;
+    background-position: -28px 0;
+    display: block;
+    background: url('../image/spr (1).png') no-repeat -0px 0;
+}
+
+
+
+.left .nav>li .n_index2{
+	 background: url('../image/spr (1).png') no-repeat -0px -28px;
+}
+.left .nav>li .n_index3{
+	 background: url('../image/spr (1).png') no-repeat 0px -56px;
+}
+.left .nav>li>.n_index4{
+	 background: url('../image/spr (1).png') no-repeat 0px -84px;
+}
+.left .nav>li .n_index5{
+	 background: url('../image/spr (1).png') no-repeat  0px -112px;
+}
+
+.left .nav>li>b>a{
+	display:block;
+	text-align:center;
+	color:#5c5c59;
+}
+.left .nav>li>b>a:hover{
+	color:white;
+}
+.left .nav>li >em{
+	display:block;
+	text-align:center;
+	color:#5c5c59;
+}
+.left .nav>li >em:hover{
+	color:white;
+}
+
+
+.right{
+	width:330px;
+	height:1180px;
+	position: absolute;
+	background: #319a2a;
+	float: right;
+	top:40px;
+	right:0px;
+
+}
+.right .r_top{
+	width:330px;
+	height:454px;
+	background: url('../image/k3.png');
+	overflow: hidden;
+}
+.login{
+	display:inline-block;
+	width:240px;
+	height:33px;
+	
+	margin:214px 0 0 63px;
+	text-align:center;
+	line-height:33px;
+	color: #ffffff;
+}
+.login>a{
+	color: #ffffff;
+}
+
+.main{
+	width:840px;
+	height:1040px;
+	margin-left: 180px;
+}
+.main>h2{
+	font-size:40px;
+	 color: rgb(103, 147, 0);
+
+}
+.main>p{
+	font-size: 16px;
+    color: rgb(144, 144, 144);
+}
+.main>img{
+	margin:50px 0 ;
+}
+.list{
+	width:800px;
+	height:371px;
+	/*border:1px solid black;
+*/
+}
+.list .q1{
+	height: 35px;
+    margin-top: 50px;
+    padding-left: 40px;
+    font-weight: bold;
+    background: url('../image/spr (1).png') no-repeat -94px 0;
+
+}
+.list>dd{
+	display:block;
+	padding-left:40px;
+	font-size:14px;
+}
+.list .q2{
+	height: 35px;
+    margin-top: 50px;
+    padding-left: 40px;
+    font-weight: bold;
+    background: url('../image/spr (1).png') no-repeat -94px -35px;
+}
+.list .q3{
+	height: 35px;
+    margin-top: 50px;
+    padding-left: 40px;
+    font-weight: bold;
+    background: url('../image/spr (1).png') no-repeat -94px -70px;
+}
+.foot{
+  	width:1040px;
+  	height:100px;
+  	margin:15px auto 0;
+  /*	border:1px solid white;*/
+  }
+  .foot>p{
+  	display:block;
+  	color:white;
+  	font-size:12px;
+  	text-align:center;
+
+  }
+  .foot>p>a{
+  	color:#b1b1b1;
+  }
+  .btn{
+  	
+    width: 133px;
+    height: 33px;
+    line-height: 33px;
+    margin: 20px 0 0 40px;
+    background:url('../image/spr (1).png') no-repeat 0 -306px;
+    
+   
+    text-align:center;
+    font-size:14px;
+   display:block;
+  }
+
+  .btn>b{
+  
+ 		color:white;
+ 		display: line-block;
+ 		
+ 		font-size: 14px;
+  }
+  .btn>b:hover{
+
+
+ border-bottom:1px solid white; }
+  
+	

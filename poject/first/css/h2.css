@@ -1,0 +1,241 @@
+/*====================公共样式======================*/
+*{ margin: 0; padding: 0; }
+img { border: 0 none; vertical-align: center; }
+ul, li { list-style-type: none;}
+h1, h2, h3, h4, h5, h6 { font-size: 14px; }
+body, input, select, button, textarea { font-size: 14px; font-family:"微软雅黑";  }	/*设置默认字体*/
+button { cursor: pointer; }
+i, em, cite { font-style: normal; }
+aside section,.body{display:block; width:1000px; margin:0 auto;}
+a, a:link { color: #000; text-decoration: none; }/*设置a标签基本样式与伪类选择器设置*/
+a:visited {}
+a:active, a:hover { text-decoration: none; color:#d00000; }
+a:focus { outline: none; } 
+
+/* 常用字体颜色或者背景着色 */
+.orange { color:#F26E01;}
+
+/* 用于清除浮动的样式 */
+.clear:after {
+	display: block;
+	content: '清除浮动';
+	height: 0;
+	visibility: hidden;
+	clear:both;
+}
+/*====================公共样式======================*/
+body{
+	background: #000;
+}
+.top{
+	width:100%;
+	height:42px;
+	/*border:1px solid black;*/
+	background: white;
+}
+section{
+	width:1000px;
+	height:42px;
+	margin:0px auto;
+	background: white;
+}
+.top>section>a{
+	display:block;
+	width:150px;
+	height:20px;
+	border-right:1px solid #b1b1b1;
+	margin:10px 0 0 0px;
+	
+	float: left;
+
+}
+.top>section>a>img{
+	width:205px;
+	height:40px;
+	margin:-10px 0 0 -55px;
+}
+.top>section>img{
+	float: right;
+
+}
+.top_p{
+	width:970px;
+	height:185px;
+	position: absolute;
+	left:612px;
+	display:none;
+}
+
+.top>section:hover>.top_p{
+	display:block;
+}
+.bd {
+    height: 1466px;
+    background: url('../image/body_bg.jpg') no-repeat center top;
+}
+.main{
+	width:1000px;
+	height:1466px;
+	background: url('../image/main_bg.jpg');
+	margin:0px auto;
+}
+.main>h1{
+	width:158px;
+	height:92px;
+	float: left;
+	background: url('../image/logo (1).png') no-repeat;
+	margin:30px 0 0 0;
+}
+.main>h1>a{
+	display:block;
+	width:158px;
+	height:92px;
+}
+.bd .main>p{
+	width:1000px;
+	float: left;
+	color:white;
+	text-align:center;
+	margin-top:280px;
+	font-size:14px;
+}
+.bd .main>p>a{
+	color:red;
+}
+.bd .main .star{
+	width:345px;
+	height:150px;
+	display:block;
+	
+	margin: 42px 0 0 320px;
+	clear: both;
+}
+.one{
+	width: 440px;
+    height: 625px;
+    margin: 78px 0 0 45px;
+    float: left;
+  /*  border:1px solid white;*/
+}
+.one h2{
+	width:288px;
+	height:44px;
+	background: url('../image/tit01.jpg') no-repeat;
+	margin:10px 0 0 0;
+
+}
+.one p{
+	margin:10px 0 0 0;
+	color:#b1b1b1;
+}
+.one p>em{
+	color:orange;
+}
+.one>ul{
+	margin:40px 0 0 0;
+}
+.one>ul>li>span{
+	display:block;
+	height:60px;
+	height:60px;
+	margin:0 0 0 16px;
+}
+.one>ul>li>p{
+	width:92px;
+	height:16px;
+	margin:10px 0 0 0;
+	text-align:center;
+	font-size:12px;
+}
+.one>ul>li{
+	float: left;
+	margin:0 15px 0 0;
+}
+.one>a{
+	display:block;
+	width: 258px;
+    height: 82px;
+    background: url(../image/gift_btn.jpg) no-repeat;
+    display: inline-block;
+    margin: 52px 0 0 80px;
+}
+.notice{
+	margin:35px 0 0 0;
+	color:#b1b1b1;
+}
+.notice>h3{
+	margin-bottom:10px;
+}
+	
+.notice .rule>li>span{
+	width:16px;	
+	height:16px;
+	background: url('../image/ol.png') no-repeat;
+	display: inline-block;
+	text-align: center;
+	line-height: 16px;
+	color: #97a1c6;
+    margin-right: 8px;
+}
+.two{
+	width:440px;
+	height:625px;
+	/*border:1px solid white;*/
+	float: left;
+	margin:83px 0 0 67px;
+}
+.two>h2{
+	width:288px;
+	height:44px;
+	background:url('../image/tit02.jpg') no-repeat;
+}
+.two>ul>li>p{
+	margin:10px 0 0 0;
+	color:#b1b1b1;
+	text-align:center;
+	width:92px;
+	margin:18px 0 0 105px;
+
+}
+.two p{
+	margin:10px 0 0 0;
+	color:#b1b1b1;}
+
+.two p>em{
+	color:orange;
+}
+.two>ul{
+	margin:45px 0 0 0 ;
+}
+.two>ul>li>span{
+	width:60px;
+	height:60px;
+	margin:0 0 0 123px;
+}
+.two>ul>li{
+	width:92px;
+	float: left;
+	margin:-11px 15px 0 0;
+}
+.gbtn2{
+	width:258px;
+	height:82px;
+	display:block;
+	background:url(../image/gift_btn.jpg) no-repeat;
+	margin:190px 0 0 99px;
+}
+.foot{
+  	width:100%;
+  	height:100px;
+  	margin:15px 0 0 0;
+  /*	border:1px solid white;*/
+  }
+  .foot>p{
+  	display:block;
+  	color:white;
+  	font-size:12px;
+  	text-align:center;
+
+  }
+  .foot>p>a{
+  	color:#b1b1b1;

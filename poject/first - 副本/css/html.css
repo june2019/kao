@@ -1,0 +1,267 @@
+/*====================公共样式======================*/
+*{ margin: 0; padding: 0; }
+img { border: 0 none; vertical-align: center; }
+ul, li { list-style-type: none;}
+h1, h2, h3, h4, h5, h6 { font-size: 14px; }
+body, input, select, button, textarea { font-size: 14px; font-family:"微软雅黑";  }	/*设置默认字体*/
+button { cursor: pointer; }
+i, em, cite { font-style: normal; }
+aside section,.body{display:block; width:1000px; margin:0 auto;}
+a, a:link { color: #000; text-decoration: none; }/*设置a标签基本样式与伪类选择器设置*/
+a:visited {}
+a:active, a:hover { text-decoration: none; color:#d00000; }
+a:focus { outline: none; } 
+
+/* 常用字体颜色或者背景着色 */
+.orange { color:#F26E01;}
+
+/* 用于清除浮动的样式 */
+.clear:after {
+	display: block;
+	content: '清除浮动';
+	height: 0;
+	visibility: hidden;
+	clear:both;
+}
+/*====================公共样式======================*/
+body{
+	background: #000;
+}
+.top{
+	width:100%;
+	height:42px;
+	/*border:1px solid black;*/
+	background: white;
+}
+section{
+	width:1000px;
+	height:42px;
+	margin:0px auto;
+	background: white;
+}
+.top>section>a{
+	display:block;
+	width:150px;
+	height:20px;
+	border-right:1px solid #b1b1b1;
+	margin:10px 0 0 0px;
+	
+	float: left;
+
+}
+.top>section>a>img{
+	width:205px;
+	height:40px;
+	margin:-10px 0 0 -55px;
+
+}
+.top>section>img{
+	float: left;
+
+}
+
+
+section .pp{
+	width:970px;
+	height:185px;
+	position:absolute;
+	top:42 px;
+	left:608px;
+	display:none;
+	
+
+}
+.top>section:hover>.pp{
+	display:block;
+}
+.top>section>span{
+	height:18px;
+	float: right;
+	margin:15px 0 0 0;
+	padding: 0 0 0 18px;
+	background: url('../image/logo.png') no-repeat;
+	position: relative;
+}
+
+.box2{
+	height:628px;
+	/*border:1px solid white;*/
+	background: url('../image/h2.jpg') no-repeat center top;
+}
+.box3{
+	width:1000px;
+	height:629px;
+	background: url('../image/h1.jpg') no-repeat;
+	margin:0px auto;
+	overflow: hidden;
+}
+.box3>a{
+	width:158px;
+	height:92px;
+	display:block;
+	
+	position: relative;
+	top:35px;
+}
+
+.bd_bg{
+	height:801px;
+	background: url('../image/b3.jpg') no-repeat center top;
+}
+.bd{
+    width: 1000px;
+    height: 801px;
+    background: url('../image/b2.jpg') no-repeat center top;
+    margin: 0 auto;
+    overflow: hidden;
+}
+.bd_top{
+	width:1000px;
+	height:395px;
+}
+.btm {
+    height: 406px;
+    background: url('../image/b3 (1).jpg') no-repeat ;
+    overflow: hidden;
+    position:relative;
+  }
+  .foot{
+  	width:100%;
+  	height:100px;
+  	margin:15px 0 0 0;
+  /*	border:1px solid white;*/
+  }
+  .foot>p{
+  	display:block;
+  	color:white;
+  	font-size:12px;
+  	text-align:center;
+
+  }
+  .foot>p>a{
+  	color:#b1b1b1;
+  }
+  .left{
+  	width: 390px;
+    height: 340px;
+    float: left;
+    padding: 35px 0 0 25px;
+  }
+  .left>a{
+  	width: 375px;
+    display: block;
+    background: url(../image/spr.png) no-repeat;
+  }
+  .left .star{
+	height:175px;
+  }
+  .left .wdb{
+  	height:140px;
+  	background:url(../image/spr.png) no-repeat 0 -175px;
+
+  }
+  .right{
+  	width:540px;
+  	height:234px;
+  	float: right;
+  	/*border:1px solid white;*/
+  	margin:104px 23px 0 0 ;
+  }
+  .gif-box{
+  	height:155px;
+  }
+.gif-box >li{
+float: left;
+margin: 0 25px 0 0 ;
+}
+
+.get{
+
+    display: block;
+    width: 227px;
+    height: 75px;
+    background: url(../image/spr.png) no-repeat 0 -323px;
+    margin: 0 auto;
+}
+.gif-box >li>p{
+	font-size:14px;
+	color:#fff;
+	text-align:center;
+	margin-top:-37px;
+}
+.tab{
+    width: 993px;
+    height: 64px;
+    margin: 4px auto 25px;
+    /*border:1px solid white;*/
+}
+.tab>li{
+	width:331px;
+	height:64px;
+	/*border:1px solid white;*/
+	float: left;
+	background: #5e688b;
+	text-align:center;
+	
+}
+.tab>li> input{
+	width:331px;
+	height:64px;
+	position:absolute;
+	display:block;
+	opacity: 0;
+
+
+	
+
+
+}
+.tab>li>a{	
+	width:331px;
+	display:block;
+	height:64px;
+	font-size:18px;
+	text-align:center;
+	line-height:60px;
+	color:#e9eefa;
+}
+
+.tab>li:hover{
+	background: #da8607;
+}
+.btm .tab>li>a .box{
+	width:942px;
+	height:280px;
+	padding:20px 0 0 0;
+	position:absolute;
+	top:84px;
+	left:25px;
+	/*border:1px solid white;*/
+	display:none;
+}
+ .box>p{
+	
+	line-height: 30px;
+	font-size:14px;
+	color: #ced7ef;
+	float:left;
+	margin: 20px 0 0 50px;
+	text-align:left;
+	
+}
+
+.box>img{
+	float: right;
+	margin:20px 27px 0 0px;
+}
+.btm .tab>li>input:checked+a>div{
+	display:block;
+}
+
+
+.btm .tab>li>a .box .p2{
+	margin:65px 0 0 50px;
+}
+.btm .tab>li>a .box .p3{
+	margin:55px 0 0 50px;
+}
