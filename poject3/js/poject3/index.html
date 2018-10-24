@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<head>
+	<title>斗地主(龙珠)</title>
+	<link rel="stylesheet" type="text/css" href="./css/style.css" />
+	<script type="text/javascript" src="./js/jquery-3.3.1.min.js"></script>
+	<!-- <script type="text/javascript" src="./js/hanshu.js"></script> -->
+	<script type="text/javascript" src="./js/game.js"></script>
+	<script type="text/javascript" src="./js/hanshu.js"></script>
+</head>
+<body>
+	<div id="endbg"></div>
+	<button class="tiaoguo">跳过</button>
+	<div class="kaic">
+		<video autoplay id="myvideo" width="100%" type="video/mp4" src="./video/go.mp4" -webkit-playsinline="true" controls></video>
+	</div>
+	<div class="img">
+		<div class="img-1"><img class="dragon1" src="./dragon/images/dragon_01.png"></div>
+		<div class="img-2"><img class="dragon2" src="./dragon/images/dragon_02.png"></div>
+		<div class="img-3"><img class="dragon3" src="./dragon/images/dragon_03.png"></div>
+		<div class="img-4"><img class="dragon4" src="./dragon/images/dragon_04.png"></div>
+		<div class="img-5"><img class="dragon5" src="./dragon/images/dragon_05.png"></div>
+		<div class="img-6"><img class="dragon6" src="./dragon/images/dragon_06.png"></div>
+		<div class="img-7"><img class="dragon7" src="./dragon/images/dragon_07.png"></div>
+		<div class="img-8"><img class="dragon8" src="./dragon/images/dragon_08.png"></div>
+		<div class="img-9"><img class="dragon9" src="./dragon/images/dragon_09.png"></div>
+		<div class="img-10"><img class="dragon10" src="./dragon/images/dragon_10.png"></div>
+		<div class="img-11"><img class="dragon11" src="./dragon/images/dragon_11.png"></div>
+		<div class="img-12"><img class="dragon12" src="./dragon/images/dragon_12.png"></div>
+	</div>
+
+	<div class="baby" width="300px">
+		<img src="./images/33.gif" alt="">
+	</div>
+	<div class="baby2">
+		<img src="./images/66.gif" alt="">
+	</div>
+
+	<audio id="begame" src="./audio/bg5.mp3" loop="loop" autoplay="autoplay">
+		你的浏览器不支持音频标签。。。
+	</audio>
+	<script>
+		document.getElementById("begame").volume = 0.2;
+	</script>
+	<div class="desktop">
+		<img src="./images/desk3.png" />
+	</div>
+	<div class="left">
+	<div class="head_pic">
+		<img src="./images/nongmin.png" />
+		<i>金币：3000</i>
+	</div>
+	<ul class="play_1 play">
+		
+	</ul>
+	<p class="play_btn" style="margin-left:270px">
+		<input class="get" type="button" name="" value="抢地主">
+		<input class="cancel" type="button" name="" value="不抢">
+		<span class="time1"></span>
+	</p>
+	<p class="play_btn2" style="margin-left:270px">
+		<input class="play_out" type="button" name="" value="出牌">
+		<input class="pass" type="button" name="" value="不出">
+		<input class="tips" type="button" name="" value="提示">
+		<span class="time2"></span>
+	</p>
+	</div>
+	<div class="mid">
+	
+	<div class="mid_top">
+		<ul class="all_poker">
+			<!-- <li class="back"></li> -->
+		</ul>
+	</div>
+	<div class="mid_end">
+		<div class="head_pic">
+			<img src="./images/nongmin.png" />
+			<i>金币：3000</i>
+		</div>
+		<ul class="play_2 play">
+			<!--<li style="width: 125px; height: 175px; background: url(./images/14.png) -162px -5px;"></li>
+			 <li class="select" style="width: 125px; height: 175px; background: url(./images/14.png) -162px -5px;"></li> -->
+		</ul>
+		<p class="play_btn">
+			<input class="get" type="button" name="" value="抢地主">
+			<input class="cancel" type="button" name="" value="不抢">
+			<span class="time1" style="margin:15px auto 0"></span>
+		</p>
+		<p class="play_btn2">
+			<input class="play_out" type="button" name="" value="出牌">
+			<input class="pass" type="button" name="" value="不出">
+			<input class="tips" type="button" name="" value="提示">
+			<span class="time2" style="margin:15px auto 0"></span>
+		</p>
+	</div>
+	<!-- <input class="fapai" type="button" name="" value="洗牌" /> -->
+	</div>
+	<div class="right">
+	<div class="head_pic">
+		<img src="./images/nongmin.png" />
+		<i>金币：3000</i>
+	</div>
+	<ul class="play_3 play"></ul>
+	<p class="play_btn" style="margin-right:295px">
+		<input class="get" type="button" name="" value="抢地主">
+		<input class="cancel" type="button" name="" value="不抢">
+		<span class="time1"></span>
+	</p>
+	<p class="play_btn2" style="margin-right:295px">
+		<input class="play_out" type="button" name="" value="出牌">
+		<input class="pass" type="button" name="" value="不出">
+		<input class="tips" type="button" name="" value="提示">
+		<span class="time2"></span>
+	</p>
+	</div>
+
+	<div class="deskbox"><!-- 出牌桌面 -->
+		<div class="desk"></div>
+	</div>
+
+	<div class="message"><!-- 消息面板 -->
+		<div class="msg">消息板（不抢地主)</div>
+	</div>
+
+	<div class="score"><!-- 积分面板 -->
+		
+	</div>
+
+	<div class="nobody">
+		<h3>没有人抢地主！本局流局</h3>
+		<input class="chongx" type="button" name="" value="重新开始">
+	</div><!-- 没有人抢地主 -->
+
+	<button class="fapai">洗牌</button>
+
+	<audio class="audio" src="" autoplay ><!-- 语音类型 -->
+		你的浏览器不支持音频标签。。。
+	</audio>
+	<audio class="play" src="" autoplay ><!-- 打牌声音 -->
+		你的浏览器不支持音频标签。。。
+	</audio>
+
+
+</body>
+</html>

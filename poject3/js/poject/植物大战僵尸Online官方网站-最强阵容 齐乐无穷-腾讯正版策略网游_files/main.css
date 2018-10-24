@@ -1,0 +1,210 @@
+body,ul,li,h1,h2,h3,h4,p,label,input,dd,dl,dt{margin:0;padding:0}
+body{font:14px/1.5 "microsoft yahei",Tahoma,"Arial","sans-serif";-webkit-text-size-adjust:none;color:#b1b1b1;text-align:left;background-color:#191C26;padding-top:42px}
+a {color:#b1b1b1;vertical-align:baseline;text-decoration:none;cursor:pointer;outline:none}
+a:hover{text-decoration:underline;color:#DBDBDB}
+ul,li{list-style-type:none}
+em{font-style:normal}
+a img{border:none}
+.hid{display:block;height:0;overflow:hidden}
+.tn{text-indent:-9999em;overflow:hidden;display:block}
+.fl{float:left}.fr{float:right}
+.cfix{*zoom:1}
+.cfix:after{display:table;content:"";clear:both}
+.pa{position:absolute}.pr{position:relative}
+
+.i_icon{background-image:url(http://ossweb-img.qq.com/images/pvz/web201506/i_icon.png);background-repeat:no-repeat;display:block}
+.w1000{width:1000px;margin:0 auto;overflow:hidden}
+.wrap{background:url(http://ossweb-img.qq.com/images/pvz/web201506/wrap_bg01.jpg) 50% 0 no-repeat}
+.main{background:url(http://ossweb-img.qq.com/images/pvz/web201506/main.jpg) 50% 0 no-repeat}
+.header{position:relative;height:425px}
+.logo{position:absolute;top:16px;width:197px;height:103px}
+.logo a{display:block;width:100%;height:100%}
+
+
+.topmenu .active:hover{background:url(http://ossweb-img.qq.com/images/pvz/web201506/nav-bg-24.png) no-repeat center 0}
+.topmenu .lnk-a{font-size:16px;color:#ddf1ff;font-weight:700}
+.topmenu .active:hover .lnk-a{color:#6DC234}
+.topmenu li{float:left;text-align:center;height:190px;padding-top:33px}
+.menu-list{padding-bottom:18px}
+.menu-list .nav-a{display:block;line-height:26px;color:#ddf1ff}
+.menu-list .nav-a:hover{color:#CCC}
+
+
+/*footer*/
+.footer_bg{clear:both}
+.gw_logo0{height:28px;background:url(http://ossweb-img.qq.com/images/pvz/web201406/pvz-foot-logo.png) 0px 0}
+.foot_r_p span{background-color:#373A3E}
+/*.gw_footer .pal{background-color:#353A3F}*/
+.foot_l_p{border-right:1px solid #353A3F}
+.gw_footer,.gw_footer a{color:#4c4c4c;font-size:12px;position:relative;}
+.other_logo .gw_logo1{height:29px; background:url(http://ossweb-img.qq.com/images/pvz/web201506/logo01.png)}
+
+/*tips*/
+.poplay {width:258px;height:258px;display:none}
+.closeBtn{color:#999;font:38px/52px \5b8b\4f53,tahoma,arial;position:absolute;right:-50px;text-align:center;top:-10px;width:52px;cursor:pointer}
+.closeBtn:hover{color:#f4e2eb}
+
+/*Video*/
+.videobox {background-color:#000;width:650px;height:450px;display:none}
+.videobox .guanbi {color:#999;font:38px/52px \5b8b\4f53,tahoma,arial;position:absolute;right:-50px;text-align:center;top:-10px;width:52px;cursor:pointer}
+.guanbi:hover {color:#f4e2eb}
+
+/*public*/
+.main{padding-bottom:45px}
+.indexbox{margin:auto;position:relative;min-width:960px}
+.bg3c3{background-color:#3C3F5B}
+.r_a_btn{padding:3px 25px;background-color:#363953;display:inline}
+
+.browser_tips{background:#fff9d4;color:#000;padding:10px 0;text-align:center;width:100%;border-bottom:1px solid #000}
+.browser_tips a{color:#F13C35}
+
+.login{height:20px;padding-bottom:10px;color:#FFF}
+.login a{color:#FFF}
+.login a:hover{color:#FFF777}
+
+/*开始游戏按钮*/
+.startgame{background:url(http://ossweb-img.qq.com/images/pvz/web201506/start_game_btn.jpg) 0 0 no-repeat;width:310px;height:278px;margin-right:15px;margin-bottom:15px}
+#startGame{color:#FFF;padding-top:143px;height:44px;display:block;padding-left:90px;width:220px}
+#startGame:hover{color:#FFF777;text-decoration:underline}
+.startgame .ser_pay{height:91px;line-height:91px}
+.startgame .ser_pay a{color:#b5bece;display:block;width:155px;font-weight:700}
+
+.spr_s_ico{background-image:url(http://ossweb-img.qq.com/images/pvz/web201506/spr_s_ico.png);background-repeat:no-repeat;display:block}
+.xin,.jian{margin:0 3px}
+.xin{width:18px;height:18px;background-position:left -18px}
+.jian{width:18px;height:18px;background-position:0 0}
+.ct,.fm,.wh{width:73px;height:15px;text-align:left;padding-left:20px;line-height:15px;margin-left:10px;margin-top:2px}
+.ct{background-position:0 -36px}
+.fm{background-position:0 -51px}
+.wh{background-position:0 -66px}
+
+.s_icon{width:40px;height:38px;margin-top:23px;margin-left:24px}
+.pay_icon{width:40px;height:40px;background-position:0 -352px;margin-top:26px;margin-left:24px}
+
+
+/*广告轮播*/
+.rollimg{float:left;position:relative;z-index:2;width:635px;height:278px;overflow:hidden}
+.rollimg .bd{width:9999px;position:absolute;left:0px}
+.rollimg .lb_box{width:635px;height:278px;overflow:hidden;float:left}
+.rollimg .hd{position:absolute;bottom:10px;right:15px;z-index:10}
+.rollimg .hd li{float:left;margin-left:10px;width:16px;cursor:pointer;height:16px;overflow:hidden;text-indent:-9999em;background-color:#52567B}
+.rollimg .hd li.on{background-color:#77DB21}
+
+/*三个活动*/
+.act_three{width:310px;height:278px;overflow:hidden;float:left;margin-left:15px;margin-bottom:15px}
+.act_three li{padding-top:20px;height:73px;padding-left:24px;width:286px}
+.act_three a{display:block;width:100%;height:100%}
+.act_three a:hover{text-decoration:none}
+.act_three p{height:22px;line-height:22px}
+.act_three strong{color:#5a8ebd;font-size:16px;font-weight:700}
+.act_three .more{background-color:#26273D;padding:0 2px;font-size:12px}
+.act_three .act1{background:url(http://ossweb-img.qq.com/images/pvz/web201506/act_one_bg.jpg) no-repeat}
+.act_three .act2{background:url(http://ossweb-img.qq.com/images/pvz/web201506/act_two_bg.jpg) no-repeat}
+.act_three .act3{background:url(http://ossweb-img.qq.com/images/pvz/web201506/act_three_bg.jpg) no-repeat}
+
+/*植物轮播*/
+.rollskin{float:left;position:relative;z-index:2;width:302px;height:270px;overflow:hidden;border:4px solid #3C3F5B;margin-bottom:15px;margin-left:15px}
+.rollskin .adPic a{position:absolute;left:0px;top:0px;width:100%;z-index:1;height:325px}
+.rollskin .adPic img{position:absolute;top:0;left:0;width:100%}
+.rollskin .adBtn{position:absolute;bottom:9px;right:10px;z-index:10}
+.rollskin .adBtn a{float:left;margin-left:10px;width:16px;cursor:pointer;height:16px;overflow:hidden;text-indent:-9999em;background-color:#52567B}
+.rollskin .adBtn a.on{background-color:#77DB21}
+
+.links-news{}
+/*快速入口*/
+.quick_link{width:310px;height:278px;overflow:hidden}
+.quick_link ul{width:312px}
+.quick_link li{width:135px;height:91px;padding-left:20px;border-top:1px solid #4B4F75;background-color:#3C3F5B;margin-bottom:1px;margin-right:1px;float:left;line-height:91px}
+.quick_link a{display:block}
+.quick_link span{width:48px;height:43px;margin-top:20px;margin-right:10px}
+.quick_link .yg_icon{background-position:0 -85px}
+.quick_link .gift_icon{background-position:0 -130px}
+.quick_link .data_icon{background-position:0 -174px}
+.quick_link .act_icon{background-position:0 -391px}
+.quick_link .app_icon{background-position:0 -266px}
+.quick_link .wx_icon{background-position:0 -306px}
+
+/*新闻*/
+.news-box{width:635px;overflow:hidden;height:278px;position:relative;;margin:0 0 15px 15px}
+.news-tab{height:44px}
+.news-tab li{float:left;height:43px;line-height:43px;text-align:center;width:211px;border-top:1px solid #3C3F5B}
+.news-tab a{background-color:#30324B;display:block;height:43px;border-right:1px solid #34374C;font-weight:700}
+.news-tab li.on a{background-color:#3C3F5B}
+.news-tab li.t4{width:161px}
+.news-tab a.br-none {border-right:none}
+
+.news-con{padding:20px;height:194px}
+.news-con .n_img{width:170px;height:170px}
+.news-list ul{width:388px;padding-left:37px}
+.news-list{height:170px;width:595px;position:absolute;z-index:1;opacity:0;filter:alpha(opacity=0);left:20px}
+.news-list.dis{opacity:1;filter:alpha(opacity=100)}
+.news-list li{height:30px;line-height:30px;clear:both;overflow:hidden;vertical-align:text-top}
+.news-list .type{margin-right:5px}
+li.news_one{height:36px;line-height:36px;text-align:center;margin-bottom:19px;overflow:hidden;background-color:#363953}
+.news_one span,.news_one .type{display:none}
+.news_one a{color:#5a8ebd;font-size:16px;font-weight:700}
+.news_one .news-tit{float:none}
+.news-box .more{position:absolute;right:20px;bottom:15px;font-size:12px}
+
+
+.zw_js{float:left;position:relative;z-index:2;width:635px;height:278px;overflow:hidden}
+.zw_js .zw-list{width:635px;height:234px;overflow:hidden;float:left}
+.zw_js .zw_tab{width:530px;top:234px}
+.zw_js .zw_tab li{float:left;height:43px;line-height:43px;text-align:center;width:105px;background-color:#363953;display:block;margin-right:1px;cursor:pointer;border-top:1px solid #3C3F5B}
+.zw_js .zw_tab li.on{background-color:#7AD332;color:#FFF;border-top:1px solid #A2E06F}
+.zw_js .bd{height:234px;width:9999px;position:absolute;left:0px}
+.zw_xx{padding-top:40px}
+.zw_xx strong{color:#5a8ebd;font-size:30px;font-weight:700}
+.zw_xx p{height:24px;line-height:24px}
+.zw_xx .ms{color:#5a8ebd}
+.zw_xx .jj{color:#bdbac6;height:52px;overflow:hidden}
+.zw_xx a{background-color:#363953;padding:2px 5px}
+.zw_js .more{right:0;top:234px;display:block;width:105px;height:43px;line-height:43px;text-align:center;background-color:#363953;font-size:12px}
+.zw_js .r_a_btn{left:549px;top:1px;font-size:12px;top:1px;z-index:4;font-weight:normal}
+
+.box_310{width:310px;height:278px}
+.box_con{padding:12px;clear:both;height:226px}
+.box_con li{height:24px;line-height:24px;overflow:hidden}
+.box_310 .r_a_btn{float:right;font-size:14px;font-weight:normal}
+.box_con ul{padding-top:10px;height:78px}
+.box_con .more{font-size:12px}
+
+.media{margin-bottom:15px;margin-left:15px}
+.pinpai,.shipin{margin-left:15px}
+.gonglue{margin-left:15px}
+
+.zw_js_box1,.zw_js_box2{height:278px}
+
+/*攻略*/
+.gonglue ul{height:196px}
+.gonglue .jj{display:none}
+li.gltop{height:104px;border-bottom:1px dotted #5B5D71;margin-bottom:20px}
+li.gltop .jj{display:block;padding-top:15px}
+.gltop .tit{font-size:16px;font-weight:700;display:block;height:20px;overflow:hidden}
+.gltop .tit a{color:#5a8ebd}
+
+
+@media screen and (min-width:1295px){
+.indexbox{width:1285px}
+.topmenu{padding-left:310px}
+.topmenu li{width:155px}
+.logo{left:47px}
+}
+@media screen and (max-width:1294px){
+.indexbox{width:960px}
+.topmenu{padding-left:100px}
+.topmenu li{width:143px}
+.logo{left:-116px}
+
+.act_three{position:absolute;top:745px;margin-left:0;width:960px;height:93px}
+.act_three li{float:left}
+.act_three .act1,.act_three .act2{margin-right:15px}
+
+.media{margin-bottom:0}
+.links-news{clear:both;padding-top:105px}
+.zw_js_box1{clear:both;padding-top:293px}
+.zw_js_box2{clear:both;padding-top:15px}
+.rollskin{position:absolute;top:1146px;margin-left:0;left:0}
+.pinpai{position:absolute;top:1146px;margin-left:0;left:325px}
+.shipin{position:absolute;top:1146px;margin-left:0;left:650px}
+}/*  |xGv00|af20cc75622e2b5f83edfde7834e5e14 */

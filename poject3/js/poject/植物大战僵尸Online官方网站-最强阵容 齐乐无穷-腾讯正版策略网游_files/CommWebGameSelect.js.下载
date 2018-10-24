@@ -1,0 +1,2036 @@
+function getOtherQuery(){
+	var queryUrl = "&";
+	var allQuery = window.location.href.split("?")[1];
+	var queryAr ={};
+	if(allQuery){
+	  var tmp1 = allQuery.split("&");
+	  for(var i=0;i<tmp1.length;i++){
+		  var tmp3 = tmp1[i]+"";  
+		  var tmp2 = tmp3.split("=");
+		  queryAr[tmp2[0]] = tmp2[1];  
+	  }
+	}
+	for(var i  in queryAr ){
+		if(i!="sFrom" && i!="sServerName" && i!="sServerID" && i!="pvz_login"  ){
+			queryUrl += i+"="+queryAr[i]+"&";
+		}
+	} 
+	if(queryUrl!="&"){
+		return queryUrl;
+	}else{
+		return "";
+	}
+} 
+
+ //修正
+if(  getQueryString("sFrom") ){
+	configJs["sFrom"] = getQueryString("sFrom");
+}
+
+document.domain = "qq.com";
+
+//合并全局配置信息js（commConfigJs）和渠道配置信息js（configJs）数组
+$.each(commConfigJs,function(name,value){
+	configJs[name] = value;
+});
+
+//加载FileLoadManager js
+if (typeof(FileLoadManager) == 'undefined') {
+    document.write(unescape("%3Cscript src='http://ossweb-img.qq.com/images/js/basic/fileloadmanager.js' type='text/javascript'%3E%3C/script%3E"));
+}
+
+//加载FloaterManager js
+if (typeof(FloaterManager) == 'undefined') {
+    document.write(unescape("%3Cscript src='http://ossweb-img.qq.com/images/js/basic/floatermanager.js' type='text/javascript'%3E%3C/script%3E"));
+}
+
+//加载COOKIE js
+if (typeof(CookieManager) == 'undefined') {
+    document.write(unescape("%3Cscript src='http://ossweb-img.qq.com/images/js/basic/htmlmanager.js' type='text/javascript'%3E%3C/script%3E"));
+}
+
+//加载点击流 js
+if (typeof(pgvSendClick) != 'function') {
+    document.write(unescape("%3Cscript src='http://pingjs.qq.com/tcss.ping.js' type='text/javascript'%3E%3C/script%3E"));
+}
+
+//临时保存所有服务器
+var all_JSON_area = new Array();
+var all_JSON_server = new Object();
+var all_JSON_area_server = new Array();
+all_JSON_area = JSON_area;
+all_JSON_server = JSON_server;
+all_JSON_area_server = JSON_area_server;
+
+
+var jsonLast = {};//保存最近登陆的区服id的对象  
+
+
+//保存旧的sFrom
+var old_sFrom = configJs["sFrom"];
+//点击流统计变量
+var sServerID_old = '';
+var sServerID_new = '';
+var lastLoginServerList = '';
+var lastLoginServerList_arr = new Array();
+
+//qq黑名单
+var qqAr = {
+	2658475435:true,
+	2403086830:true,
+	2290627593:true,
+	2739780374:true,
+	1461867653:true,
+	1853144818:true,
+	1770866784:true,
+	2834480032:true,
+	2593175392:true,
+	3034088257:true,
+	3039314616:true,
+	3038292754:true,
+	3138393689:true,
+	3078066506:true,
+	2304754378:true
+};
+
+//页面主逻辑
+$(function() {
+    reset_sFrom();
+    checkCookie();
+	//过滤是否开启专属大区 added by yalizhao 2012-11-26
+    if (configJs["checkYesArea"] != "") {
+        filterArea(configJs["checkYesArea"]);
+    }
+	var serverid = getQueryString('serverid');
+    if (configJs["sFrom"] == "invite" || configJs["sFrom"] == 'gameinvite') {
+        //邀请好友
+        getFriendInfo();
+    }else if(configJs["sFrom"] == 'box' && (typeof(JSON_server[serverid]) != "undefined" && JSON_server[serverid] != null)){
+			loginNew(serverid);
+	}else { //不是邀请好友
+		//解析param参数，符合格式要求直接进入该好友邀请所在的服务器
+		var inviteUin = '';
+		var inviteServerId = '';
+		if(getQueryString('param') != null){
+			var qqGameParam = getQueryString('param');
+			var arrParam = qqGameParam.split('-');
+			var arrParamLen = arrParam.length;
+			if(arrParamLen == 3){
+				inviteUin = arrParam[0];
+				inviteServerId = arrParam[1];	
+			}
+		}
+		if (typeof(JSON_server[inviteServerId]) != 'undefined' || JSON_server[inviteServerId] != null) {
+			if(configJs["sFrom"] == "qqgame"){   //qqgame
+				//CookieManager.setCookie("sInviteUin", inviteUin, 300, "/", configJs["sCookieDomainName"]);
+				loginNew(inviteServerId);
+			}
+		}else{
+			if (configJs['tplId'] == 3 || configJs['tplId'] == 2) {
+
+				//填充QQ号码和昵称
+				if (existDiv("login_nickname_span") || existDiv("qqNum")) {
+					var uin = CookieManager.getCookie("uin");
+					var skey = CookieManager.getCookie("skey");
+					if(uin && skey){
+						LoginManager.checkLogin(function() {
+							LoginManager.getNickName(function(loginInfo) {
+								if (loginInfo.isLogin) {
+									var qqNum = LoginManager.getUserUin();
+									//var nickName = loginInfo.nickName.substr(0,20);
+									$("#login_nickname_span").text(loginInfo.nickName);
+									$("#qqNum").text(qqNum);
+								}
+							});
+						});
+					}else{//如果未登陆显示“登陆”
+						var login_html = "<div><a href='javascript:LoginManager.login();'>登陆</a></div>";
+						$("#login_info").html(login_html);
+					}
+				}
+				
+				var sServerID = getQueryString('sServerID');
+				if (typeof(JSON_server[sServerID]) != "undefined" && JSON_server[sServerID] != null) {
+					if (configJs['tplId'] == 2) {
+						TCSS('AssignServerIDShow', sServerID);
+						$("#StartGame").live('click', function() {
+							TCSS('AssignServerIDLogin', sServerID); 
+						});
+						$("#StartGame").attr("href", 'javascript:loginNew(' + sServerID + ')');
+					}
+					if (configJs['tplId'] == 3) {
+						//自动登录
+						TCSS('AssignServerIDLogin', sServerID);
+						loginNew(sServerID);
+					}
+				} else {
+					LoginManager.submitLogin(function() {
+						getOldServerId();
+					})
+				}
+			} else {   //configJs['tplId'] == 6
+				if(configJs["union_area_id"] != "" && typeof(configJs["union_area_id"]) != "undefined"){
+					
+					//如果后台管理端正确配置“最近登录功能”，并且存在"server_last"的div,就拿最近登录的区服
+					if (configJs["getLastLogin"] == 1 && (     existDiv('server_last') || existDiv('server_last_muti') || existDiv('server_last_muti_tpl1')    )   ) {
+						getOldServerId();
+					}
+					$("#allServer").hide();
+					setTimeout("onload_f()",1000);
+				}else{
+					onload_f();
+					$("#allServer").hide();
+				}
+			}
+		}
+    }
+	
+	//IP推荐点击流统计
+	if (configJs['tplId'] == 6) { 
+			//进入最近登录服务器点击流统计
+			$("#sOldServerA").live('click', function() {
+				if(sServerID_old){
+					TCSS('LoadServerLogin', sServerID_old);
+				}else if(sServerID_new){
+					TCSS('ipRecommendLogin', sServerID_new);
+				}
+			});
+			$(".mytt").live('click', function() {
+				if(sServerID_old){
+					TCSS('LoadServerLogin', sServerID_old);
+				}else if(sServerID_new){
+					TCSS('ipRecommendLogin', sServerID_new);
+				}
+			});
+			//有最近登录服务器时点击“重新选区”流统计
+			$(".mySerInfo .a_choose").live('click', function() {
+				if(sServerID_old){
+					TCSS('LoadServerReselect');
+				}else if(sServerID_new){
+					TCSS('ipRecommendReselect');
+				}
+			});
+			//进入重新选择服务器后，点击”查看最近登录“点击流统计
+			$("#backLogin").live('click', function() {
+				if(sServerID_old){//老用户
+					TCSS('LoadServerReselectView');
+				}else if(sServerID_new){
+					TCSS('IPRecommendReselectEnter', sServerID_new);
+				}
+			});
+	}
+	//公用加载选区页点击流统计
+	TCSS('PageView');
+	if (existDiv('recommend_servers')) {//推荐服务器存在
+		if(typeof(JSON_recommend) != "undefined" && JSON_recommend.length != 0){
+			for(var i = 0; i < JSON_recommend.length; i++){
+				var recommendId = JSON_recommend[i];
+				var ListServerAId = 'server_' + recommendId;
+				TCSS('RecommendServerShow',recommendId);//推荐服务器点击流统计
+				$("#recommend_servers #"+ListServerAId).live('click', function() {
+					TCSS('RecommendServerLogin', recommendId);
+				});
+			}
+		}
+	}
+	if (existDiv('new_servers')) {//最新服务器存在
+		if(typeof(JSON_new) != "undefined" && JSON_new.length != 0){
+			for(var j = 0; j < JSON_new.length; j++){
+				var newId = JSON_new[j];
+				var ListServerAId = 'server_' + newId;
+				TCSS('NewServerShow',newId);//最新服务器点击流统计
+				$("#new_servers #"+ListServerAId).live('click', function() {
+					TCSS('NewServerLogin', newId);
+				});
+			}
+		}
+	}
+	if (existDiv('server_last') || existDiv('server_last_muti_tpl1')) {//最近服务器存在
+		lastLoginServerList = CookieManager.getCookie("lastLoginServerList");
+		if(lastLoginServerList){
+			lastLoginServerList_arr = lastLoginServerList.split(",");
+			if(typeof(lastLoginServerList_arr) != "undefined" && lastLoginServerList_arr.length != 0){
+				var LastSingleServerAId = 'server_' + lastLoginServerList_arr[0];
+				$("#server_last #"+LastSingleServerAId).live('click', function() {//单个最近登录服务器点击流统计
+					TCSS('LoadServerLogin', lastLoginServerList_arr[0]);
+				});
+				for(var n = 0; n < lastLoginServerList_arr.length; n++){
+					var lastLoginServerId = lastLoginServerList_arr[n];
+					var LastMutiServerAId = 'server_' + lastLoginServerId;
+					$("#server_last_muti_tpl1 #"+LastMutiServerAId).live('click', function() {
+						TCSS('LoadServerLogin', lastLoginServerId);//多个最近登录服务器点击流统计
+					});
+				}
+			}
+		}
+	}
+
+	//单服点击开始游戏点击流统计
+	if (configJs['tplId'] == 2) {
+		var sServerID = getQueryString('sServerID');
+		$("#StartGame").live('click', function() {
+			var singleServerId = CookieManager.getCookie("singleServer");
+			var recommendServerId = CookieManager.getCookie("recommendServer");
+			if((singleServerId || recommendServerId) && !sServerID){
+				if(singleServerId){
+					TCSS('LoadServerLogin', singleServerId); 
+				}else{
+					TCSS('RecommendServerLogin', recommendServerId); 
+				}
+			}
+		});
+	}
+
+});
+
+$('#btn_delay').click(function() {
+    sServerID = CookieManager.getCookie("sServerID");
+    loginNewNoRealName(sServerID)
+});
+
+function initClickVar(){
+	lastLoginServerList = CookieManager.getCookie("lastLoginServerList");
+	if(lastLoginServerList){
+		lastLoginServerList_arr = lastLoginServerList.split(",");
+		if(typeof(lastLoginServerList_arr) != "undefined" && lastLoginServerList_arr.length != 0){
+			for(var n = 0; n < lastLoginServerList_arr.length; n++){
+				TCSS('LoadServerShow', lastLoginServerList_arr[n]);//多个最近登录服务器点击流统计
+			}
+		}
+	}
+}
+
+//随机获取一个服务器(推荐服务器有，就取推荐服务器；没有再看最新服务器；最后看json_server)
+function getSserverId(){
+	var sServerID = "";
+	if(typeof(JSON_recommend) != "undefined" && JSON_recommend.length != 0){
+		sServerID = randArray(JSON_recommend, 1);
+	}else{
+		if(typeof(JSON_new) != "undefined" && JSON_new.length != 0){
+			sServerID = randArray(JSON_new, 1);
+		}else{
+			// var sJson_area = randArray(JSON_area, 1)['sAreaID'];
+			// sServerID = randArray(JSON_area_server[sJson_area],1);
+			sServerID = randArray(JSON_server,1);
+		}
+	}
+	return sServerID;
+}
+
+
+/*
+@fn 重写JSON_area,JSON_server,JSON_area_server,JSON_recommend,JSON_new
+@param $areaId string 大区选项卡Id
+*/
+function filterArea(areaId) {
+  
+	var arr_areaId = new Array();
+    var jareaId = new Array();
+    var area_server = new Array();
+    var oAServer = new Object();
+    var jServer = new Array();
+    var recommend = new Array();
+    var newj = new Array();
+    var colSer = new Array();
+    var cIndex = 0;
+
+	//大区选项卡id组成的数组
+    chenmzh = areaId.split("|");
+    var arr_index = 0;
+	//重写JSON_area，这个时候的JSON_area就是需要遍历的大区选项卡，根据最新登陆的区服，得到的联盟选项卡，或非联盟选项卡
+    for (var i = 0; i < JSON_area.length; i++) {
+        var jaId = JSON_area[i]['sAreaID'];
+        var bo = in_array(jaId, arr_areaId);
+        if (bo) {
+            jareaId[arr_index] = new Array();
+            jareaId[arr_index]['sAreaID'] = JSON_area[i]['sAreaID'];
+            jareaId[arr_index]['sAreaName'] = JSON_area[i]['sAreaName'];
+            jareaId[arr_index]['sNetFlag'] = JSON_area[i]['sNetFlag'];
+            arr_index++;
+        }
+    }
+	//重写JSON_server  JSON_area_server
+    var str = '';
+    for (var j = 0; j < JSON_area.length; j++) {
+		//拿到区服选项卡id
+        var sId = JSON_area[j]['sAreaID'];
+		
+		//拿到区服选项卡id对应的区服id组成的字符串
+		//2707699:[1,2],
+		// 区服选项卡id:[区服id,区服id],
+        str += sId + ":[" + JSON_area_server[sId] + "],";
+		
+		//如果区服选项卡下有对应的区服
+		if(typeof(JSON_area_server[sId]) != "undefined" && JSON_area_server[sId].length != 0){
+			for (var s = 0; s < JSON_area_server[sId].length; s++) {
+				osId = JSON_area_server[sId][s];
+				//拿到区服信息组成的对象
+				oAServer[osId] = JSON_server[osId];
+			}
+		}
+    }
+    str = str.substring(0, str.length - 1);
+    str = "{" + str + "}";
+    str = eval('(' + str + ')');
+	JSON_server = oAServer; //重写JSON_server数组,这个时候的JSON_server是重写后JSON_area中区服选项卡id对应的区服组成的对象
+    JSON_area_server = str; //重写JSON_area_server，区服选项卡id对应的区服id组成的数组
+    
+	
+	//将JSON_area对应的所有区服id组成数组
+	for (var u = 0; u < JSON_area.length; u++) {
+        var sId = JSON_area[u]['sAreaID'];		
+        for (var r = 0; r < JSON_area_server[sId].length; r++) {
+            colSer[cIndex] = JSON_area_server[sId][r];
+            cIndex++;
+        }
+    }
+	
+	
+	//重写JSON_recommend
+    var recommend_index = 0;
+    for (var n = 0; n < JSON_recommend.length; n++) {
+        var re = JSON_recommend[n];
+        if (in_array(re, colSer)) {
+            recommend[recommend_index] = re;
+            recommend_index++;
+        }
+    }
+	JSON_recommend = recommend; //重写推荐server数组
+	
+	//重写JSON_new
+    var new_index = 0;
+    for (var m = 0; m < JSON_new.length; m++) {
+        var ne = JSON_new[m];
+        if (in_array(ne, colSer)) {
+            newj[new_index] = ne;
+            new_index++;
+        }
+    }
+    JSON_new = newj; //重写最新server数组
+
+	
+	//
+    //JSON_Telecom_iServerId,JSON_NetCom_iServerId,JSON_Crewel_iServerId首先判断是否存在，然后在重写
+    if (typeof(JSON_Telecom_iServerId) != "undefined" && JSON_Telecom_iServerId != null) {
+        var telBool = in_array(JSON_Telecom_iServerId, colSer);
+        if (telBool == false) {
+            JSON_Telecom_iServerId = null;
+        }
+    }
+    if (typeof(JSON_NetCom_iServerId) != "undefined" && JSON_NetCom_iServerId != null) {
+        var netBool = in_array(JSON_NetCom_iServerId, colSer);
+        if (netBool == false) {
+            JSON_NetCom_iServerId = null;
+        }
+    }
+    if (typeof(JSON_Crewel_iServerId) != "undefined" && JSON_Crewel_iServerId != null) {
+        var creBool = in_array(JSON_Crewel_iServerId, colSer);
+        if (creBool == false) {
+            JSON_Crewel_iServerId = null;
+        }
+    }
+
+}
+
+//判断一个元素是否在一个数组函数 added by yalizhao 
+
+function in_array(str, arr_json) {
+    for (var i = 0; i < arr_json.length; i++) {
+        if (typeof(arr_json[i]) != "undefined" && arr_json[i] != null) {
+            if (arr_json[i] == str) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+//body渲染完成后执行函数
+
+function onload_f() {
+	
+	//如果全局信息中配置了联盟大区
+	if(configJs["union_area_id"] != "" && typeof(configJs["union_area_id"]) != "undefined"){
+		isUnionArea();
+	}
+    //如果存在"servers_daqu"div, 画大区和第一个大区的服务器列表
+    if (existDiv('servers_daqu')) {
+		
+		//
+		var JSON_area_tmp=[];
+		for(var i=0;i<JSON_area.length;i++){
+			if(JSON_area[i].unionFlag==0){
+				JSON_area_tmp.push(JSON_area[i]);
+			}
+		}
+		JSON_area = JSON_area_tmp;
+		
+		
+        FillTemplate('servers_daqu', 'template_area', JSON_area, 'area_list');
+        if (typeof(JSON_area[0]) != "undefined" && JSON_area[0] != null) {
+            drawAreaServersByAreaID(JSON_area[0]['sAreaID']);
+        }
+        $('#servers_daqu').children('ul li:first-child').attr('class', 'select');
+    }
+
+    //如果存在"recommend_servers"div,画推荐服务器
+    if (existDiv('recommend_servers')) {
+        
+        //<<<<<<<fixed by xboyliu 2014.11.19 21:17:00 GMT+0800
+        (function() {
+        function getServersXboyliu() {
+            var data = window.JSON_LAST;
+            
+            if(data.ret != 0) {
+                return filter_JSON_recommend();
+            }
+            
+            var t = $.trim(data.sOldServerId || '').split(',');
+            var lastServer = parseInt(t[0]) || 0;
+            if(lastServer <= 0) {
+                return filter_JSON_recommend();
+            }
+            
+            return [lastServer];
+        }
+        var timer = setInterval(function() {
+            if(!window.JSON_LAST) return;
+            clearInterval(timer);
+            var new_JSON_recommend = getServersXboyliu();
+            FillTemplate('recommend_servers', 'template_server', new_JSON_recommend, 'server_list');
+        }, 200);
+        
+        })();
+        //>>>>>>fixed by xboyliu 2014.11.19 21:17:00 GMT+0800
+        
+        //var new_JSON_recommend = filter_JSON_recommend();
+        //FillTemplate('recommend_servers', 'template_server', new_JSON_recommend, 'server_list');
+    }
+
+    //如果存在"new_servers"div,画最新服务器
+    if (existDiv('new_servers')) {
+        FillTemplate('new_servers', 'template_server', JSON_new, 'server_list');
+    }
+
+    //填充QQ号码和昵称
+    if (existDiv("login_nickname_span") || existDiv("qqNum")) {
+		
+		var uin = CookieManager.getCookie("uin");
+		var skey = CookieManager.getCookie("skey");
+		if(uin && skey){
+			
+			LoginManager.checkLogin(function() {
+				LoginManager.getNickName(function(loginInfo) {
+					var qqNum = LoginManager.getUserUin();
+						$("#login_nickname_span").text(loginInfo.nickName);
+						$("#qqNum").text(qqNum);
+				});
+			});
+		}else{//如果未登陆显示“登陆”
+			var login_html = "<div><a href='javascript:LoginManager.login();'>登陆</a></div>";
+			$(".login_info").html(login_html);
+		}
+    }
+	if(configJs["union_area_id"] == "" ||  typeof(configJs["union_area_id"]) == "undefined"){
+		//如果管理端正确配置“最近登录功能”，并且存在"server_last"div, 画最近登录
+		if (configJs["getLastLogin"] == 1 && (existDiv('server_last') || existDiv('server_last_muti') || existDiv('server_last_muti_tpl1'))) {
+			getOldServerId();
+		}
+	}
+}
+
+/**若配置联盟大区，先拉取最近登陆，再决定是画联盟大区还是平台大区
+*/
+function isUnionArea(){
+	//var serverId_arr = new Array();
+	var jAreaStr = '';
+	
+	if(configJs["union_area_id"] != ""){
+		//有最近登陆过区服
+		if(typeof(jsonLast.sOldServerId) != "undefined"){
+			//serverId_arr = joinServerId();
+			var sOldServerIdStr = String(jsonLast.sOldServerId);
+			var serverFor = sOldServerIdStr.split(',');
+			//var union_bool = in_array(serverFor[0],serverId_arr);
+			//var isUnionOldServer = 1;//1表示最近登陆的是联盟服务器
+			//拿到最近登陆的1个区服是联盟区服还是非联盟区服
+			if(typeof(JSON_server[serverFor[0]]) != "undefined"){
+				var isUnionOldServer = JSON_server[serverFor[0]].unionFlag;
+			}
+			// if(union_bool == false){
+				// isUnionOldServer = 0;//0表示最近登陆的是平台服务器
+			// }
+		}
+		var unionAreaId_arr = new Array();
+	    
+		//联盟区选项卡id组成的字符串
+		var unionAreaId_str = configJs["union_area_id"];
+		
+		//联盟区选项卡id组成的数组
+		unionAreaId_arr = unionAreaId_str.split("|");
+		
+		if(old_sFrom == 'union'){//联盟渠道union
+			if(typeof(jsonLast.sOldServerId) != "undefined" && isUnionOldServer == 0){
+				//最近登录服务器是平台区，显示平台区，隐藏所有联盟区
+				for (var i = 0; i < JSON_area.length; i++) {
+					if(jAreaStr == ''){
+						jAreaStr = JSON_area[i]['sAreaID'];
+					}else{
+						jAreaStr = jAreaStr + '|' + JSON_area[i]['sAreaID'];
+					}
+				}
+				for(var m = 0; m < unionAreaId_arr.length; m++){
+					jAreaStr = jAreaStr.replace(unionAreaId_arr[m],'');
+				}
+				filterArea(jAreaStr);
+				$("#allServer").show();
+			}else{
+				//新用户和最近登录服务器是联盟的，显示联盟区，隐藏所有平台区
+				filterArea(configJs["union_area_id"]);
+				$("#allServer").hide();
+			}
+		}else{//平台渠道website
+			//最近登陆的区服是联盟区的区服
+			if(typeof(jsonLast.sOldServerId) != "undefined" && isUnionOldServer == 1){
+				filterArea(configJs["union_area_id"]);
+				$("#allServer").show();
+			}else{
+				//最近登陆的区服是平台区的区服
+				//拿到所有区服选项卡id
+				for (var i = 0; i < JSON_area.length; i++) {
+					if(jAreaStr == ''){
+						jAreaStr = JSON_area[i]['sAreaID'];
+					}else{
+						jAreaStr = jAreaStr + '|' + JSON_area[i]['sAreaID'];
+					}
+				
+				}
+				//过滤掉联盟选项卡
+				for(var m = 0; m < unionAreaId_arr.length; m++){
+					jAreaStr = jAreaStr.replace(unionAreaId_arr[m],'');
+				}
+				
+				filterArea(jAreaStr);
+				$("#allServer").hide();
+			}
+		}
+	}
+}
+
+//点击查看服务器选项
+$('#showAllServer').change(function() {
+	if($("#showAllServer").attr("checked")){
+		JSON_area = all_JSON_area;
+		JSON_server = all_JSON_server;
+		JSON_area_server = all_JSON_area_server;
+	}else{
+		//location.reload();//重新载入一下页面
+		isUnionArea();
+		if (configJs["checkYesArea"] != "") {
+			filterArea(configJs["checkYesArea"]);
+		}
+	}
+	//画出所有服务器
+	FillTemplate('servers_daqu', 'template_area', JSON_area, 'area_list',1);
+	if (configJs['tplId'] == 4) { //“多服切换”模板
+		drawRecommendServers();
+	} else {
+		if (typeof(JSON_area[0]) != "undefined" && JSON_area[0] != null) {
+			drawAreaServersByAreaID(JSON_area[0]['sAreaID']);
+		}
+	}
+	$('#servers_daqu').children('ul li:first-child').attr('class', 'select');
+});
+
+/**
+拼接联盟大区服务器
+*/
+function joinServerId(){
+	var unionAreaId_arr = new Array();
+	var serverId_arr = new Array();
+	var unionAreaId_str = configJs["union_area_id"];
+	unionAreaId_arr = unionAreaId_str.split("|");
+	var serverId_index = 0;
+	for (var j = 0; j < unionAreaId_arr.length; j++) {
+		var sId = unionAreaId_arr[j];
+		if(typeof(all_JSON_area_server[sId]) != "undefined"){
+			for(var r = 0; r < all_JSON_area_server[sId].length; r++){
+				serverId_arr[serverId_index] = all_JSON_area_server[sId][r];
+				//alert(serverId_arr[serverId_index]);
+				serverId_index++;
+			}
+		}
+	}
+	return serverId_arr;
+	
+}
+
+/**
+ 验证参数
+ 画好友邀请
+ */
+
+function getFriendInfo() {
+    LoginManager.submitLogin(function() {
+        var sParam = getQueryString('p');
+        if (!sParam) {
+            alert(loginTips['InvalidPara']); //参数非法！
+            return false;
+        }
+        var arrParam = sParam.split('-');
+        var iInviteUin = Number(arrParam[0]);
+        var iInviteServerId = Number(arrParam[1]);
+
+        if (typeof(JSON_server[iInviteServerId]) == 'undefined' || JSON_server[iInviteServerId] == null) {
+            alert(loginTips['ServerNoExist']); //'很抱歉，服务器暂时不存在，请选择其他服务器！'
+            location.href = configJs["otherChannelUrl"];
+            return false;
+        } else {
+            CookieManager.setCookie("sInviteUin", iInviteUin, 300, "/", configJs["sCookieDomainName"]);
+            var oInvite = {
+                'sInviteNickname': iInviteUin,
+                'iInviteUin': iInviteUin,
+                'iInviteServerId': iInviteServerId,
+                'sInviteServerName': JSON_server[iInviteServerId].sServerName
+            };
+            //好友邀请预填充
+            if (existDiv("div_invite")) {
+                FillTemplate('div_invite', 'template_invite', oInvite, '');
+            }
+            var sUrl = configJs["inviteUinInfoUrl"] + "&friend_uin=" + iInviteUin;
+            LoginManager.submitLogin(function() {
+                FileLoadManager.ajaxRequest({
+                    'url': sUrl,
+                    'showLoadingStr': '正在拉取好友资料...',
+                    'onLoadSuccessEvent': function() {
+                        return fillInviteUinInfo(oInvite, sUrl)
+                    },
+                    'onLoadErrorEvent': function() {
+                        handleErrorEvent(sUrl, 'inviteUinInfoUrl address not found')
+                    }
+                });
+            })
+        }
+    })
+
+    /**
+     填充好友资料
+     */
+
+    function fillInviteUinInfo(oInvite, inviteUinInfoUrl) {
+        if (typeof(JSON_InviteUinInfo) != "undefined" && JSON_InviteUinInfo != null) {
+            if (JSON_InviteUinInfo.ret == 0) {
+                //画好友邀请
+                if (existDiv("div_invite")) {
+                    oInvite.sInviteNickname = JSON_InviteUinInfo.friend_nickname;
+                    FillTemplate('div_invite', 'template_invite', oInvite, '');
+                } else if (configJs['tplId'] == 3) {
+                    //自动开始游戏
+                    loginNew(oInvite.iInviteServerId);
+                } else {
+                    onload_f();
+                    return true;
+                }
+            } else if (JSON_InviteUinInfo.ret == 1000) {
+                LoginManager.login(function() {
+                    fillInviteUinInfo(oInvite)
+                });
+                return false;
+            } else {
+                if (JSON_InviteUinInfo.ret > 0) {
+                    alert(JSON_InviteUinInfo.msg);
+                }
+                location.href = configJs["otherChannelUrl"];
+                return false;
+            }
+        } else { //报警
+            handleErrorEvent(inviteUinInfoUrl, 'JSON_InviteUinInfo not found');
+        }
+    }
+}
+
+/**
+ 最新服务器
+ */
+
+function drawNewServers() {
+    $("#choose_secserver_list").show();
+    $("#choose_secserver_loading").hide();
+
+    FillTemplate('choose_secserver_list', 'template_server', JSON_new, 'server_list');
+}
+
+
+/**
+ 推荐服务器
+ */
+
+function drawRecommendServers() {
+    $("#choose_secserver_list").show();
+    $("#choose_secserver_loading").hide();
+
+    var new_JSON_recommend = filter_JSON_recommend();
+    FillTemplate('choose_secserver_list', 'template_server', new_JSON_recommend, 'server_list');
+}
+
+/**
+ 画出指定大区的服务器列表
+ */
+
+function drawAreaServersByAreaID(sAreaID) {
+    $("#choose_secserver_list").show();
+    $("#choose_secserver_loading").hide();
+	//	
+	if( JSON_area_server[sAreaID] != "" ){
+		sServerIds = JSON_area_server[sAreaID];
+		FillTemplate('choose_secserver_list', 'template_server', sServerIds, 'server_list');
+	}else{
+		FillTemplate('choose_secserver_list', 'template_server', {}, 'server_list');
+	}	
+}
+
+
+
+/**
+ 判断div是否存在，如存在，则返回true,否则返回false
+ */
+
+function existDiv(divName) {
+    if ($("#" + divName).size() > 0) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+/**
+ 用户选择服务器登录，
+ 1)先判断是否登录，如无登录，弹出登录框
+ 2)再判断是否已实名验证，如无实名验证，弹出实名验证框
+ 3)登录游戏并保存最近登录服务器
+ */
+
+function loginNew(sServerID,forceChannel) {
+	if(typeof(forceChannel)=="undefined"){
+		forceChannel='';
+	}
+    TCSS('LoginNew', sServerID); //点击服务器点击流统计
+    if (checkCookie() === false) {
+        return;
+    }
+    if ((typeof(JSON_server[sServerID]) == "undefined" || JSON_server[sServerID] == null) || JSON_server[sServerID].sServerStatus == 0) {
+        alert(loginTips['ServerDown']); //很抱歉，停机维护中，请稍后再试
+        return;
+    }
+    var sServerName = JSON_server[sServerID].sServerName;
+    CookieManager.setCookie("sServerName", sServerName, 300, "/", configJs["sCookieDomainName"]);
+    CookieManager.setCookie("sServerID", sServerID, 300, "/", configJs["sCookieDomainName"]);
+
+    LoginManager.submitLogin(function() {
+        if (configJs["checkRealName"] == 1) {
+            TCSS('CheckRealName', sServerID); //验证实名制点击流统计
+            var sUrl = configJs["sCheckRealNameUrl"];
+            FileLoadManager.ajaxRequest({
+                'url': sUrl,
+                'showLoadingStr': '正在验证实名制...',
+                'onLoadSuccessEvent': function() {
+                    fcheckover(sServerID, sUrl)
+                },
+                'onLoadErrorEvent': function() {
+                    sCheckRealNameUrlNotFound(sServerID, sUrl)
+                }
+            });
+        } else {
+            loginNewNoRealName(sServerID,forceChannel);
+        }
+    });
+
+    function fcheckover(sServerID, sCheckRealNameUrl) {
+        if (typeof(JSON_RealNameReg) != "undefined" && JSON_RealNameReg != null) {
+            if (JSON_RealNameReg.iRet == "0") { /**登录游戏并保存最近登录*/
+                loginNewNoRealName(sServerID);
+            } else { /**弹出实名验证框*/
+                showPop('realname');
+            }
+        } else { //报警
+            loginNewNoRealName(sServerID);
+            handleErrorEvent(sCheckRealNameUrl, 'JSON_RealNameReg not found');
+        }
+    }
+
+    function sCheckRealNameUrlNotFound(sServerID, sUrl) {
+        loginNewNoRealName(sServerID);
+        handleErrorEvent(sUrl, 'sCheckRealNameUrl address not found');
+    }
+}
+
+/**保存最近登录并登录游戏*/
+
+function loginNewNoRealName(sServerID,forceChannel) {
+	if(typeof(forceChannel)=="undefined"){
+		forceChannel='';
+	}
+    //保存最近登录
+    if (configJs["getLastLogin"] == 1 && !(typeof(JSON_LAST) != "undefined" && sServerID == JSON_LAST.sOldServerId)) {
+        TCSS('SaveServer', sServerID); //保存最近登录服务器点击流统计
+        var sUrl = configJs["sSaveServerIdUrl"] + "&sNewServerId=" + sServerID + "&rd=" + Math.random();
+        FileLoadManager.ajaxRequest({
+            'url': sUrl,
+            'showLoadingStr': '正在保存最近登录服务器...',
+            'onLoadSuccessEvent': function() {
+                webGameLogin(sUrl,forceChannel)
+            },
+            'onLoadErrorEvent': function() {
+                sSaveServerIdUrlNotFound(sUrl)
+            }
+        });
+    } else {
+        webGameLogin('',forceChannel);
+    }
+
+    function sSaveServerIdUrlNotFound(sUrl) {
+        handleErrorEvent(sUrl, 'sSaveServerIdUrl address not found');
+    }
+
+
+    function webGameLogin(sSaveServerIdUrl,forceChannel) {
+		if(typeof(forceChannel)=="undefined"){
+			forceChannel='';
+		}
+
+		var sFrom = old_sFrom;
+		var loginPf = getQueryString('pf');
+		if(typeof(JSON_server[sServerID]) == 'undefined'){
+			JSON_server = all_JSON_server;
+		}
+		
+		//
+		if(JSON_server[sServerID].unionFlag == "0" && sFrom != 'union'){//从平台渠道进入平台大区，不做请求
+			
+		}else{
+			var PF_get_cookie = "PF" + "_" + configJs['sGameKind'] + "_" + LoginManager.getUserUin();
+			var sPf_cookie = CookieManager.getCookie(PF_get_cookie);
+			if(sPf_cookie == "union-10055-1" || sPf_cookie == "union-10055-2" || sPf_cookie == "union-10055-3" || sPf_cookie == null || sPf_cookie == ""){
+				SetPFCookie();
+			}
+			sPf_cookie = CookieManager.getCookie(PF_get_cookie);
+			var report_PF ="";
+			if(JSON_server[sServerID].unionFlag == "1" && (sPf_cookie == "union-10055-1" || sPf_cookie == null)){
+				report_PF =loginPf + "*" + loginPf;
+				ReportRegisterData(sServerID,report_PF);
+			}
+		}
+		
+		//
+        if (configJs["getLastLogin"] == 1 && !(typeof(JSON_LAST) != "undefined" && sServerID == JSON_LAST.sOldServerId)) {
+            if (typeof(JSON_SAVESVR) != "undefined" && JSON_SAVESVR != null) {
+                if (JSON_SAVESVR.ret == '1000') {
+                    LoginManager.login(function() {
+                        loginNewNoRealName(sServerID)
+                    })
+                }
+            } else { //报警
+                handleErrorEvent(sSaveServerIdUrl, 'JSON_SAVESVR not found');
+            }
+        }
+
+        //自研业务设置pt4_token
+        if (configJs["sGameType"] == '1' && configJs["sDomainId"] != '') { 
+            SetPtCookie();
+        }
+
+        
+
+        var sLoginCgiUrlParam = "";
+        if (sFrom == "invite") {
+            sLoginCgiUrlParam = "&sIviteUin=" + CookieManager.getCookie("sInviteUin");
+        }
+
+        CookieManager.setCookie('sFrom', sFrom, 300, "/", configJs["sCookieDomainName"]);
+
+        TCSS('LoginCgi', sServerID); //登录游戏拉取xx_login等点击流统计
+
+        var sUrl = configJs["sLoginCgiUrl"] + "&sFrom=" + sFrom + "&sServerId=" + sServerID + sLoginCgiUrlParam + "&rd=" + Math.random();
+
+        FileLoadManager.ajaxRequest({
+            'url': sUrl,
+            'showLoadingStr': '正在登录游戏...',
+            'onLoadSuccessEvent': function() {
+                doLogin(sFrom, sServerID, sUrl,forceChannel)
+            },
+            'onLoadErrorEvent': function() {
+                sLoginCgiUrlNotFound(sUrl)
+            }
+        });
+    }
+
+    function sLoginCgiUrlNotFound(sUrl) {
+        handleErrorEvent(sUrl, 'sLoginCgiUrl address not found');
+        alert(loginTips['SystemError']); //很抱歉，系统内部出错
+        return false;
+    }
+	
+	function filterSererID(serverID){
+		if(serverID_Replace[sServerID]!=null){
+			sServerID=serverID_Replace[sServerID];
+		}
+		return sServerID;
+	}
+
+    function doLogin(sFrom, sServerID, sLoginCgiUrl,forceChannel) {
+		sServerID=filterSererID(sServerID);
+		//强制设置channel
+		if(typeof(forceChannel)=="undefined"){
+			forceChannel='';
+		}
+		//选区页修改pf值
+		var PF = '';
+		var loginPf = getQueryString('pf');
+		var PF_get_cookie = "PF" + "_" + configJs['sGameKind'] + "_" + LoginManager.getUserUin();
+		var sPf = CookieManager.getCookie(PF_get_cookie);
+		//var unionServerArr = joinServerId();
+		//var isunionServer = in_array(sServerID,unionServerArr);
+		var isunionServer = JSON_server[sServerID].unionFlag;
+		if(sFrom == 'union'){//从联盟渠道进入
+			if(isunionServer == "1"){//进入联盟大区
+				if(sPf == "union-10055-1"){//新用户
+					PF = loginPf + "*" + loginPf;
+				}else{//老用户
+					if(sPf){
+						PF = sPf + "*" + loginPf;
+					}else{
+						PF = "union-10055-3" + "*" + loginPf;
+					}
+				}
+			}else{//进入平台大区
+				PF = "union-10055-1*" + loginPf;
+			}
+		}else{//从平台渠道进入
+			if(isunionServer == "1"){//进入联盟大区
+				if(sPf){
+					PF = sPf + "*" + loginPf;
+				}else{
+					PF = "union-10055-2" + "*" + loginPf;
+				}
+			}else{//进入平台大区
+				PF = configJs["sFrom"];
+			}
+		}
+		//修正sFrom
+		if(parseInt(JSON_server[sServerID].unionFlag)==1 ){
+			sFrom = "union-10029-2*website";
+		}
+		
+		
+		if(configJs["sGetPriUrl"]){
+			TCSS('loginAllow');//需要验证白名单点击流统计
+		}
+        if (typeof(JSON_WEBGAME_LOGIN) != "undefined" && JSON_WEBGAME_LOGIN != null) {
+            if (JSON_WEBGAME_LOGIN.ret < 0) { //系统内部出错 缺少配置文件，调用idip失败等
+                handleErrorEvent(sLoginCgiUrl, 'JSON_WEBGAME_LOGIN RETURN ERROR');
+                alert(loginTips['SystemError']); //很抱歉，系统内部出错
+                return false;
+            } else {
+                if (JSON_WEBGAME_LOGIN.ret == '1') { // 接口调用失败 缺少参数等
+                    alert(JSON_WEBGAME_LOGIN.msg);
+                    return false;
+                } else if (JSON_WEBGAME_LOGIN.ret == '2') { //用户未登录
+                    LoginManager.login(function() {
+                        loginNew(sServerID)
+                    })
+                } else if (JSON_WEBGAME_LOGIN.ret == '3') { //用户没有资格
+                    if (confirm(loginTips['loginNoAllow'])) { //很抱歉，您没有游戏资格,请获取资格
+						if(configJs["sGetPriUrl"]){
+							self.location.href = configJs["sGetPriUrl"];
+						}
+                        return false;
+                    }
+                } else if (JSON_WEBGAME_LOGIN.ret == '4') { //服务器维护中
+                    alert(loginTips['ServerDown']); // 很抱歉，停机维护中，请稍后再试
+                    return false;
+                } else if (JSON_WEBGAME_LOGIN.ret == '0') { //登录成功
+                    var cookies = JSON_WEBGAME_LOGIN.cookies[0];
+                    var gameurl = unescape(JSON_WEBGAME_LOGIN.gameurl);
+
+                    //$("<b>Paragraph. </b>").replaceAll("p"); 
+                    gameurl = gameurl.replace("&amp;", "&");
+
+                    var sServerName = JSON_server[sServerID].sServerName;
+
+                    if ((/\?(.*?)/.test(gameurl))) {
+                        gameurl = gameurl + "&";
+                    } else {
+                        if ((/(.*?)\.(com|cn)$/.test(gameurl))) {
+                            gameurl = gameurl + '/';
+                        }
+						//if(configJs['sGameKind'] == 'ch'){
+							//gameurl = gameurl + 'do.php?a=index&';
+						//}else{
+							gameurl = gameurl + "?";
+						//}
+                    }
+                    var addParams = getAddParams(PF); //地址栏参数引进
+					if(getQueryString('pf') || getQueryString('sPageFrom')){
+						var param = "sServerName=" + encodeURIComponent(sServerName) + "&sServerID=" + sServerID;
+					}else{
+						var param = 'sFrom=' + encodeURIComponent(sFrom) + "&sServerName=" + encodeURIComponent(sServerName) + "&sServerID=" + sServerID;
+						
+					}
+
+                    for (cookieName in cookies) {
+                        //清除cookie
+                        CookieManager.delCookie(cookieName);
+                        cookieValue = unescape(cookies[cookieName]);
+                        CookieManager.setCookie(cookieName, cookieValue, 300, "/", configJs["sCookieDomainName"]);
+                        param = param + '&' + cookieName + '=' + cookieValue;
+                    }
+
+                    // if (sFrom == 'qplus' || sFrom == '3366' || sFrom == '4399' || sFrom == '2144' || sFrom == '7k7k' || sFrom == 'games' || sFrom == 'gamezone') { //跨浏览器，不使用cookie，使用传参
+					if(configJs["sendType"] == '1'){//跨浏览器，不使用cookie，使用传参
+						if(addParams){
+							gameurl = gameurl + param + "&" + addParams;
+						}else{
+							gameurl = gameurl + param;
+						}
+                        
+                    } else {
+						gameurl = gameurl + addParams;
+                    }					
+		
+					gameurl = gameurl+getOtherQuery();
+					if(PF=="xinyue"){
+						//心悦支付特殊处理
+						gameurl=gameurl+"&pf=website";
+					}
+					var flag='';
+					if(gameurl.substr(gameurl.length-1,1)!='&'){
+						flag='&';
+					}
+					var channel = getQueryString( "channel" );
+					if( channel ){
+						gameurl +=flag+"channel="+channel;
+					}else{
+						if(forceChannel.length>0){
+							gameurl +=flag+"channel="+forceChannel;
+							//官网导入屏蔽黄钻特权
+							if(forceChannel=='website2qzone'){
+								gameurl +='&banActViewID=11:12';
+							}
+						}
+					}
+					
+
+					
+                    //if(configJs["sCookieDomainName"]=='9z.qq.com'){
+//                    if (configJs["sGameType"] == '1' && configJs["sDomainId"] != '') { //added by yalizhao
+//                        var yxurl = encodeURIComponent(gameurl);
+//                        var pt4_token = CookieManager.getCookie("wl_pt4_token");
+//                        gameurl = "http://ptlogin2.qq.com/pt4_web_jump?pt4_token=" + pt4_token + "&daid=" + configJs["sDomainId"] + "&appid="+configJs['siAppId']+"&succ_url=" + yxurl;
+//                    }
+                    //}
+
+                    TCSS('EnterGame', sServerID); //进入游戏点击流统计
+					
+					//为了盒子渠道记忆最近登录
+					if(configJs["sFrom"] == 'box'){
+						try {
+								parent.setGameUrl(window.location.href + '?serverid='+sServerID );
+								window.external.CallClient("RegionSelResult", "SvrId:"+ sServerID +" SvrName:" + sServerName);
+						} catch (e) {
+							window.console && console.log("box catch::"+e.description);
+						}
+					}
+                    var gameTitle = configJs["sGameNameCn"] + '-' + sServerName;
+                    switch (configJs["jumpType"]) {
+/*
+						0=>'自身跳转',  //CgiOutput.GoUrl
+									1=>'QQ群接口',  //javascript:window.top.G.qxer.open
+									2=>'3366接口',  //javascript:sendMgpProxyCmd
+									3=>'朋友接口',  //javascript:top.XY.AppLib.popUpFullFrame
+									4=>'游戏人生接口', //javascript:parent.callBackForGame
+									5=>'父窗口打开',//javascript:parent.location.href
+									6=>'顶层窗口打开',//javascript:top.location.href
+									7=>'空间窗口打开',//javascript:pengyou.FP.popupDialog
+									8 => 'QQ宠物窗口打开', // javascript:top.PET.openFsDialog(url)
+						*/
+                    case 0:
+                        //自身跳转
+                        self.location.href = gameurl;
+                        break;
+                    case 1:
+                        //QQ群接口
+                        try {
+                            window.top.G.qxer.open(gameurl);
+                            location.href = document.referrer;
+                        } catch (e) {
+                            alert("未检测到父窗口函数，请将本页面嵌入q群应用中进行测试");
+                        }
+
+                        break;
+                    case 2:
+                        //3366代理页方式
+                        var sUrl = "http://web.3366.com/wgproxy.html?cmd=1&u=" + encodeURIComponent(gameurl) + "&game=" + configJs["sGameKind"] + "&areaId=" + sServerID + "&title=" + encodeURIComponent(gameTitle) + "&rd=" + Math.random();
+                        self.location.href = sUrl;
+                        break;
+                    case 3:
+                        //朋友接口
+                        try {
+                            if (configJs["pengyou_appid"] != "undefined" && configJs["pengyou_appid"] != null && configJs["pengyou_appid"] > 0) {
+                                var pengyou_opt = {
+                                    'title': gameTitle,
+                                    'appid': configJs["pengyou_appid"],
+                                    //appi错误，会报“服务器繁忙，请稍后再试”
+                                    'callback': null,
+                                    'url': gameurl
+
+                                };
+                                if (configJs["pengyou_fullScrn"] != "undefined" && configJs['pengyou_fullScrn'] == 1) { //全屏
+
+                                } else {
+                                    pengyou_opt['width'] = configJs['pengyou_weight'];
+                                    pengyou_opt['height'] = configJs['pengyou_hight'];
+                                }
+                                fusion2.control.showFullWindow(pengyou_opt);
+                            } else {
+                                if (configJs["pengyou_fullScrn"] != "undefined" && configJs["pengyou_fullScrn"] != 1) {
+                                    top.XY.AppLib.popupDialog(gameurl, {
+                                        title: gameTitle,
+                                        width: configJs["pengyou_weight"],
+                                        height: configJs["pengyou_hight"],
+                                        onClosed: null
+                                    });
+                                } else {
+                                    top.XY.AppLib.popUpFullFrame(gameurl, gameTitle);
+                                }
+                            }
+                        } catch (e) {
+                            alert("未检测到父窗口函数，请将本页面嵌入朋友应用中进行测试");
+                        }
+                        break;
+                    case 4:
+                        //游戏人生接口
+                        try {
+                            parent.callBackForGame(gameurl, configJs["sGameKind"]);
+                        } catch (e) {
+                            alert("未检测到父窗口函数，请将本页面嵌入游戏人生中进行测试");
+                        }
+                        break;
+                    case 5:
+                        //父窗口打开
+                        parent.location.href = gameurl;
+                        break;
+                    case 6:
+                        //顶层窗口打开
+                        top.location.href = gameurl;
+                        break;
+                    case 7:
+                        //空间窗口打开
+                        try {
+                            if (configJs["qzone_appid"] != "undefined" && configJs["qzone_appid"] != null && configJs["qzone_appid"] > 0) {
+                                var qzone_opt = {
+                                    'title': gameTitle,
+                                    'appid': configJs["qzone_appid"],
+                                    //appi错误，会报“服务器繁忙，请稍后再试”
+                                    'callback': null,
+                                    'url': gameurl
+
+                                };
+                                if (configJs["qzone_fullScrn"] != "undefined" && configJs['qzone_fullScrn'] == 1) { //全屏
+
+                                } else {
+                                    qzone_opt['width'] = configJs['qzone_weight'];
+                                    qzone_opt['height'] = configJs['qzone_hight'];
+                                }
+                                fusion2.control.showFullWindow(qzone_opt);
+                            } else {
+                                qzone.FP.popupDialog(gameTitle, {
+                                    src: gameurl
+                                }, configJs['qzone_weight'], configJs['qzone_hight']);
+                            }
+                        } catch (e) {
+                            alert("未检测到父窗口函数，请将本页面嵌入空间中进行测试");
+                        }
+                        break;
+					case 8:
+						//QQ宠物窗口打开
+						try {
+                            top.PET.openFsDialog(gameurl);
+                        } catch (e) {
+                            alert("未检测到父窗口函数，请将本页面嵌入QQ宠物中进行测试");
+                        }
+                        break;
+					case 9:
+						//联盟窗口打开
+						var opt = {
+                                'title': gameTitle,
+                                'appid': configJs['union_appid'],
+                                //appi错误，会报“服务器繁忙，请稍后再试”
+                                'callback': null,
+                                'url': gameurl
+                        };
+                        try {
+                            parent.GU.Redirect2Game(opt);
+                        } catch(e) {
+                            if(typeof(fusion2) != "undefined"){
+								fusion2.control.showFullWindow(opt);
+							}else{
+								alert("未检测到父窗口函数，请从游戏联盟入口进入进行测试");
+							}
+                        }
+                        break;
+					case 10:
+                        //微博窗口打开
+                        try {
+                            if (configJs["weibo_appid"] != "undefined" && configJs["weibo_appid"] != null && configJs["weibo_appid"] > 0) {
+                                var weibo_opt = {
+                                    'title': gameTitle,
+                                    'appid': configJs["weibo_appid"],
+                                    //appid错误，会报“服务器繁忙，请稍后再试”
+                                    'callback': null,
+                                    'url': gameurl
+
+                                };
+                                if (configJs["weibo_fullScrn"] != "undefined" && configJs['weibo_fullScrn'] == 1) { //全屏
+
+                                } else {
+                                    weibo_opt['width'] = configJs['weibo_weight'];
+                                    weibo_opt['height'] = configJs['weibo_hight'];
+                                }
+                                fusion2.control.showFullWindow(weibo_opt);
+                            } else {
+                                weibo.FP.popupDialog(gameTitle, {
+                                    src: gameurl
+                                }, configJs['weibo_weight'], configJs['weibo_hight']);
+                            }
+                        } catch (e) {
+                            alert("未检测到父窗口函数，请将本页面嵌入微博中进行测试");
+                        }
+                        break;
+					case 11:
+                        //3366开平模式
+                        var sUrl= encodeURIComponent(gameurl)+"?openid="+getQueryString("openid")+"&openkey="+getQueryString("openkey")+"&platform="+ getQueryString("pf")+"&pf="+ getQueryString("pf")+"&serverid="+sServerID+"&pfkey="+getQueryString("pfkey")+"&s=" + Math.random();
+						$(document).ready(function(){
+							try{
+								top.GameAPI.jump(sUrl,gameTitle,300, 400);
+							} catch (e) {
+								alert("未检测到父窗口函数,请将本页面嵌入3366开平模式测试");
+							}
+						});
+                        break;
+                    default:
+                        break;
+                    }
+                } else {
+                    handleErrorEvent(sLoginCgiUrl, '系统未知错误');
+                    alert(loginTips['SystemError']); //很抱歉，系统内部出错
+                }
+            }
+        } else { //报警
+            handleErrorEvent(sLoginCgiUrl, 'JSON_WEBGAME_LOGIN not found');
+            alert(loginTips['InterfaceError']); //很抱歉，接口出错
+        }
+        return false;
+    }
+
+
+}
+
+// 填充模板
+/*
+sDestName: div id 名称
+sTemplateName: js 模板id名称
+oJson: 填充的数据，以数组形式
+sKeyName: js 模板 “{for sAreaID in sKeyName}”
+sType: 标示是否是“查看全部服务器”显示，1表示是，0表示不是”
+*/
+
+function FillTemplate(sDestName, sTemplateName, oJson, sKeyName,sType) {
+	if(sType===undefined){
+		sType=0;//设置sType默认值
+	}
+    if (existDiv(sDestName)) {
+        window.console && console.log(oJson);
+
+        if (sKeyName == '' || typeof(sKeyName) == 'undefined') {
+            window.console && console.log("FillTemplate('" + sDestName + "', '" + sTemplateName + "',oJson )");
+        } else {
+            window.console && console.log("FillTemplate('" + sDestName + "', '" + sTemplateName + "',oJson , '" + sKeyName + "')");
+        }
+
+        var myTemplateObj = TemplateManager.parseTemplate($("#" + sTemplateName).html());
+        var result = "";
+
+        if (typeof(oJson) != "undefined" && oJson != null) {
+            result = myTemplateObj.process(oJson, sKeyName);
+        }
+
+        if (sDestName == "servers_daqu" && (configJs["tplId"] == 4 || configJs["tplId"] == 6 || configJs["tplId"] == 8) && sType==0) {
+            $("#" + sDestName).append(result);
+        } else {
+			if((configJs["tplId"] == 4 || configJs["tplId"] == 6 || configJs["tplId"] == 8) && sType==1){
+				result = '<li><label class="s_dx" onClick="drawRecommendServers();changeTab(this);"  hidefocus>推荐服务器</label></li><li><label class="s_dx" onClick="drawNewServers();changeTab(this);"  hidefocus>最新服务器</label></li>'+ result;
+			}
+            //$('#'+sDestName).html(result);
+            $('#' + sDestName).attr("innerHTML", result);
+        }
+    } else {
+        window.console && console.log('缺少div:[' + sDestName + ']');
+    }
+
+}
+
+
+/**
+@fn 获取最近登录的服务器id,  若接口返回成功，则画出最近登录服务器
+ */
+function getOldServerId() {
+	if (configJs['tplId'] == 6 || configJs['tplId'] == 8) { //IP推荐多服切换模板
+        FillTemplate('oldUser', 'template_none_server', {});
+        FillTemplate('backLogin', 'template_none_server_banner', {});
+    }
+	
+	//请求url，获取最近登陆的区服对象JSON_LAST(最近登陆的区服并不一定上架)
+    LoginManager.checkLogin(function() {
+        TCSS('LoadServer'); //获取最近登录服务器点击流统计
+		//获取最近登陆区服的请求url
+        var sUrl = configJs["sLoadServerIdUrl"] + "&rd=" + Math.random();
+		var oneFloater = FloaterManager.init({ 'isShowCover': false, 'coverOpacity': 1});
+        oneFloater.ajaxLoading('正在获取最近登录服务器...');
+        FileLoadManager.ajaxRequest({
+            'url': sUrl,
+            'showLoadingStr': '',
+            'dataType' : 'object',
+			'dataTypeName' : 'JSON_LAST',
+            'onLoadSuccessEvent': function() {
+                fnGetSuc(sUrl)
+            },
+            'onLoadErrorEvent': function() {
+                sLoadServerIdUrlNotFound(sUrl)
+            },
+            'onLoadCompleteEvent' : function(){
+                oneFloater.close();
+            } //加载完成以后的方法
+        })
+    });
+
+    function fnGetSuc(sLoadServerIdUrl) {	
+
+	   if (typeof(JSON_LAST) != "undefined" && JSON_LAST != null ) {
+			/*
+			最近登陆的区服组成的对象
+			JSON_LAST = {
+				msg :"获取最近登陆服务器id成功",  //
+				ret:"0",                         //获取数据的状态标识
+				sOldServerId:"0,1,101"           //最近登陆的所有区服id组成的字符串
+			}
+			*/
+			
+			//将最近登陆过且仍然上架的区服id存放进数组newServerFor 
+            var newServerFor = new Array();  
+            if (JSON_LAST.ret == '0') {
+                if (typeof(JSON_LAST.sOldServerId) != "undefined" && JSON_LAST.sOldServerId != null) {
+                    var sOldServerIdStr = String(JSON_LAST.sOldServerId);
+					var serverFor = sOldServerIdStr.split(',');
+                }
+                var j = 0;
+                for (i = 0; i < serverFor.length; i++) {
+                    var sid = serverFor[i];
+                    if (typeof(JSON_server[sid]) != "undefined" && JSON_server[sid] != null) {
+                        newServerFor[j] = sid;   
+                        j++;
+                    }
+                }
+            }
+			
+			
+            if (newServerFor.length != 0) {
+               
+				var singleServer = newServerFor[0];
+                var server_list = [singleServer]; //拿到一个最近登陆且仍然上架的区服
+                var server = {
+                    'sServerId': server_list
+                };
+				CookieManager.setCookie('lastLoginServerList', newServerFor, 300, "/", configJs["sCookieDomainName"]);
+
+				//将最近登陆过且仍然上架的所有区服画出来 
+				if (existDiv('server_last_muti_tpl1')) {
+				//	showO();
+					//FillTemplate('server_last', 'template_server', server_list, 'server_list');
+                    FillTemplate('server_last_muti_tpl1', 'template_server', newServerFor, 'server_list');
+					initClickVar();//初始化点击流变量
+                }
+				
+				
+				//区分模板id画最近登陆且仍然上架的所有(1个)区服
+                if (configJs['tplId'] == 4) {
+                //    showO();
+                    FillTemplate('server_last', 'template_last_server', server_list, 'server_list');
+                } else if (configJs['tplId'] == 6 || configJs['tplId'] == 8) {   //IP推荐多服切换模板，将最近登陆过且仍然上架的1个区服画出来
+                //    showO();
+                    FillTemplate('oldUser', 'template_last_server', server, 'server_list');
+                    FillTemplate('backLogin', 'template_last_server_banner', {});
+                    FillTemplate('server_last', 'template_server', server, 'server_list');
+					sServerID_old = server['sServerId'];
+					//TCSS('LoadServerShow', server['sServerId']); //IP推荐有最近登录服务器点击流统计
+                } else if (configJs['tplId'] == 3 || configJs['tplId'] == 2) { //将最近登陆过且仍然上架的1个区服画出来
+                    if (configJs['tplId'] == 2) {
+						TCSS('LoadServerShow',singleServer); //进入最近登录服务器点击流统计 
+                        $("#StartGame").attr("href", 'javascript:loginNew(' + singleServer + ')');
+						//清空改模板下，无最近登陆时，保存的推荐服务器的cookie
+						CookieManager.setCookie('recommendServer', '', 300, "/", configJs["sCookieDomainName"]);
+						CookieManager.setCookie('singleServer', singleServer, 300, "/", configJs["sCookieDomainName"]);
+                    }
+                    if (configJs['tplId'] == 3) {
+                        //自动登录
+						TCSS('LoadServerLogin',singleServer); //进入最近登录服务器点击流统计
+                        loginNew(singleServer);
+                    }
+                    return;
+                } else {//将最近登陆过且仍然上架的1个区服画出来
+                    FillTemplate('server_last', 'template_server', server_list, 'server_list');
+					if (!existDiv('server_last_muti_tpl1') && existDiv('server_last')) {
+						TCSS('LoadServerShow',singleServer); //单个最近登录服务器点击流统计
+					}
+                }
+				
+				
+				
+				//将所有最近登陆过且仍然上架的所有区服画出来 
+                FillTemplate('server_last_muti', 'template_server', newServerFor, 'server_list');
+				//将最近登陆过且仍然上架的1个区服做登陆 
+				if(singleServer == 1 && qqAr[LoginManager.getUserUin()] ){
+					if( $.browser.msie ){
+						$("#sOldServerA").attr("href", 'http://game.pvz.qq.com/game.html?sFrom=website&sServerName=豌豆1区&sServerID=8');
+					}else{
+						$("#sOldServerA").attr("href", 'http://game.pvz.qq.com/game.html?sFrom=website&sServerName=%E8%B1%8C%E8%B1%861%E5%8C%BA&sServerID=8');
+					}	
+				}else{
+					$("#sOldServerA").attr("href", 'javascript:loginNew(' + singleServer + ')');
+				}
+                
+				
+            } else if (JSON_LAST.ret == 1000) { //用户未登录
+				CookieManager.setCookie('lastLoginServerList', '', 300, "/", configJs["sCookieDomainName"]);
+                LoginManager.login(function() {
+                    getOldServerId()
+                });
+            } else { //无最近登录服务器  或 最近登陆服务器下架
+				if (configJs['tplId'] == 4) { //多服切换模板,显示选区页
+					CookieManager.setCookie('lastLoginServerList', '', 300, "/", configJs["sCookieDomainName"]);
+                    showN();
+                } else if (configJs['tplId'] == 6 || configJs['tplId'] == 8) { //IP推荐多服切换模板
+                    if (valid_IP_Crewel()) { //双线
+						
+                        var server = {
+                            'sServerId': JSON_Crewel_iServerId
+                        };
+	
+                        FillTemplate('oldUser', 'template_recommend_server', server);
+                        FillTemplate('backLogin', 'template_recommend_server_banner', server);
+						sServerID_new = JSON_Crewel_iServerId;
+                        TCSS('ipRecommendShow', JSON_Crewel_iServerId); //有IP推荐服务器时点击流统计
+                    } else if (valid_IP_Telecom() || valid_IP_NetCom()) {
+						if(valid_IP_Telecom() && valid_IP_NetCom() == false){
+							var server = {
+								'sServerId': JSON_Telecom_iServerId
+							};
+							FillTemplate('oldUser', 'template_recommend_server', server);
+							FillTemplate('backLogin', 'template_recommend_server_banner', server);
+							sServerID_new = JSON_Telecom_iServerId;
+                            TCSS('ipRecommendShow', JSON_Telecom_iServerId); //有IP推荐服务器时点击流统计
+						}else if(valid_IP_NetCom() && valid_IP_Telecom() == false){
+							var server = {
+								'sServerId': JSON_NetCom_iServerId
+							};
+							FillTemplate('oldUser', 'template_recommend_server', server);
+							FillTemplate('backLogin', 'template_recommend_server_banner', server);
+							sServerID_new = JSON_NetCom_iServerId;
+                            TCSS('ipRecommendShow', JSON_NetCom_iServerId); //有IP推荐服务器时点击流统计
+						}else{
+							var sUrl = configJs["IPTypeUrl"] + "&rd=" + Math.random();
+							FileLoadManager.ajaxRequest({
+								'url': sUrl,
+								'showLoadingStr': '正在查询用户带宽情况...',
+								'onLoadSuccessEvent': function() {
+									IPGetSuc(sUrl)
+								},
+								'onLoadErrorEvent': function() {
+									IPTypeUrlNotFount(sUrl)
+								}
+							})
+						}
+                    } else {
+					
+                        FillTemplate('oldUser', 'template_none_server', {});
+                        FillTemplate('backLogin', 'template_none_server_banner', {});
+                    }
+                } else if (configJs['tplId'] == 3 || configJs['tplId'] == 2) { //单服模板
+                    //推荐服务器取随机一个
+                    var sServerID = randArray(JSON_recommend, 1);
+                    if (sServerID == 'undefined' || sServerID == null) { //如果没有，取取默认的。
+                        sServerID = configJs["sServerID"];
+                    }
+                    if (configJs['tplId'] == 2) {
+						TCSS('RecommendServerShow', sServerID); //随机推荐点击流统计
+                        $("#StartGame").attr("href", 'javascript:loginNew(' + sServerID + ')');
+						//清空一下该模板下的有最近登录时，保存的cookie
+						CookieManager.setCookie('singleServer', '', 300, "/", configJs["sCookieDomainName"]);
+						CookieManager.setCookie('recommendServer', sServerID, 300, "/", configJs["sCookieDomainName"]);
+                    }
+                    if (configJs['tplId'] == 3) {
+                        //自动登录
+						TCSS('RecommendServerLogin', sServerID); //随机推荐点击流统计
+                        loginNew(sServerID);
+                    }
+                    return;
+                } else {
+                    $("#server_last").html("暂无最近登录");
+					if (existDiv('server_last_muti_tpl1')) { //多服列表
+						$("#server_last_muti_tpl1").html("暂无最近登录");
+					}
+                }
+            }
+        } else { //报警
+			
+			if (configJs['tplId'] == 6 || configJs['tplId'] == 8) {
+				
+                FillTemplate('oldUser', 'template_none_server', {});
+                FillTemplate('backLogin', 'template_none_server_banner', {});
+            }else{
+				$("#server_last").html("暂无最近登录");
+				if (existDiv('server_last_muti_tpl1')) { //多服列表
+					$("#server_last_muti_tpl1").html("暂无最近登录");
+				}
+			}
+			if(configJs['tplId'] == 3){
+				sServerID = getSserverId();
+				//自动登录
+				loginNew(sServerID);
+			}
+            handleErrorEvent(sLoadServerIdUrl, 'JSON_LAST not found')
+        }
+		//
+		var fn = getQueryString('tab');		
+		if(fn && $("#oldUser").css("display")=="block" ){		
+			$("#oldUser").hide();		
+			$("#newUser").show();
+		}
+    }
+
+    function sLoadServerIdUrlNotFound(sUrl) {
+		if (configJs['tplId'] == 6 || configJs['tplId'] == 8) {
+            FillTemplate('oldUser', 'template_none_server', {});
+            FillTemplate('backLogin', 'template_none_server_banner', {});
+        }else{
+			$("#server_last").html("暂无最近登录");
+			if (existDiv('server_last_muti_tpl1')) { //多服列表
+				$("#server_last_muti_tpl1").html("暂无最近登录");
+			}
+		}
+		if(configJs['tplId'] == 3){
+			sServerID = getSserverId();
+			//自动登录
+			loginNew(sServerID);
+		}
+        handleErrorEvent(sUrl, 'sLoadServerIdUrl address not found')
+    }
+
+    function IPTypeUrlNotFount(sUrl) {
+        FillTemplate('oldUser', 'template_none_server', {});
+        FillTemplate('backLogin', 'template_none_server_banner', {});
+        handleErrorEvent(sUrl, 'IPTypeUrl address not found')
+    }
+
+    function IPGetSuc(IPTypeUrl) {
+        if (typeof(JSON_IP_TYPE) != "undefined" && JSON_IP_TYPE != null) {
+            if (JSON_IP_TYPE.ret == 0) { //获取宽带类型成功
+                if (JSON_IP_TYPE.ip_type == 2 && valid_IP_Telecom()) { //电信
+                    var server = {
+                        'sServerId': JSON_Telecom_iServerId
+                    };
+                    FillTemplate('oldUser', 'template_recommend_server', server);
+                    FillTemplate('backLogin', 'template_recommend_server_banner', server);
+                    //TCSS('Telecom', JSON_Telecom_iServerId); //电信推荐点击流统计
+                    return;
+                } else if (JSON_IP_TYPE.ip_type == 3 && valid_IP_NetCom()) { //网通
+                    var server = {
+                        'sServerId': JSON_NetCom_iServerId
+                    };
+                    FillTemplate('oldUser', 'template_recommend_server', server);
+                    FillTemplate('backLogin', 'template_recommend_server_banner', server);
+                    //TCSS('NetCom', JSON_NetCom_iServerId); //网通推荐点击流统计
+                    return;
+                }
+            }
+        } else { //报警
+            handleErrorEvent(IPTypeUrl, 'JSON_IP_TYPE not found')
+        }
+        FillTemplate('oldUser', 'template_none_server', {});
+        FillTemplate('backLogin', 'template_none_server_banner', {});
+    }
+
+    //验证双线推荐服务器是否有效
+
+    function valid_IP_Crewel() {
+        if ((typeof(JSON_Crewel_iServerId) != "undefined" && JSON_Crewel_iServerId != null) && (typeof(JSON_server[JSON_Crewel_iServerId]) != "undefined" && JSON_server[JSON_Crewel_iServerId] != null)) {
+            return true;
+        }
+        return false;
+    }
+
+    //验证电信推荐服务器是否有效
+
+    function valid_IP_Telecom() {
+        if ((typeof(JSON_Telecom_iServerId) != "undefined" && JSON_Telecom_iServerId != null) && (typeof(JSON_server[JSON_Telecom_iServerId]) != "undefined" && JSON_server[JSON_Telecom_iServerId] != null)) {
+            return true;
+        }
+        return false;
+    }
+
+    //验证网通推荐服务器是否有效
+
+    function valid_IP_NetCom() {
+        if ((typeof(JSON_NetCom_iServerId) != "undefined" && JSON_NetCom_iServerId != null) && (typeof(JSON_server[JSON_NetCom_iServerId]) != "undefined" && JSON_server[JSON_NetCom_iServerId] != null)) {
+            return true;
+        }
+        return false;
+    }
+}
+
+/**显示id=tag的层，并显示蒙板*/
+
+function showPop(tag) {
+    $("#" + tag).show();
+    $("#mask").show();
+    $('#mask').attr("style:height", document.body.scrollHeight);
+    if (tag == 'realname' && configJs["RealNameDelay"] == 1) {
+        $("#btn_delay").show();
+    }
+    return false;
+}
+
+/**隐藏id=tag的层，并关闭蒙板*/
+
+function hidePop(tag) {
+    $("#" + tag).hide();
+    $("#mask").hide();
+}
+
+
+/*多服列表模板切换*/
+
+function showO() {
+    //隐藏第一个简要模板 xboyliu 2015.05.26
+    $("#newUser").show();
+    $("#oldUser").hide();
+    //$("#newUser").hide();
+    //$("#oldUser").show();
+}
+
+function showN() {
+    $("#newUser").show();
+    $("#oldUser").hide();
+}
+
+
+//用于切换大区的class变化
+
+function changeTab(tag) {
+    var czone = $('#servers_daqu').children("li");
+    for (var i = 0; i < czone.length; i++) {
+        $(czone[i]).attr('class', '');
+    }
+    $(tag).parent().attr('class', 'select');
+}
+
+// 注销帐号 退出返回官网
+
+function Logout() {
+    LoginManager.logout(function() {
+        self.location.href = configJs["logoutUrl"];
+    });
+}
+
+/**
+ 过滤推荐服务器 要有“推荐位”标志，且“畅通”的服务器
+ */
+
+function filter_JSON_recommend() {
+    //    var new_JSON_recommend = $.grep(JSON_recommend, function(n, i) {
+    //        return JSON_server_sPeopleStatus[n] == 1;
+    //    });	
+		if( JSON_recommend ){
+			var tmp = [];
+			for(var i=0;i<JSON_recommend.length;i++){
+				if( JSON_server[ JSON_recommend[i] ].unionFlag!="1"){
+					tmp.push( JSON_recommend[i] );
+				}	
+			}
+			return tmp;
+		}
+    //return JSON_recommend;
+}
+
+/**
+*PF string 新转化的pf值 联盟注册sfrom*登录渠道sfrom
+*/
+function getAddParams(PF) {
+    //处理url透传参数
+    var validParams = ["access_token", "openid", "openkey", "p", "charid", "sPageFrom", "ADUIN", "ADSESSION", "ADTAG", "param", "new_qz_inviteuin", "app_custom","app_user_source","app_contract_id", "invkey", "itime", "iopenid", "pf", "via","pfkey","qz_height","qz_width","uin","pfid","qz_ver","appcanvas","qz_style","params","entertime","canvastype","detail","statid","track","app_tid","app_rid","app_sid","app_isfirst","user_source","contract_id","sApp"];
+    var pLength = validParams.length;
+    var addQueryString = "";
+    var querys = [];
+    var i = 0;
+    var k = 0;
+    for (i; i < pLength; i++) {
+        var name = validParams[i];
+        var value = getQueryString(name);
+        if (value != null) {
+            //            if (name == "p") {
+            //                var arr = value.split("-");
+            //                value = arr[0];
+            //            }
+            if (name == "sPageFrom" || name == "pf") {
+				if(name == "pf" && configJs["union_area_id"] != ""){
+					value = PF;
+				}
+                name = "sFrom";
+            }
+            querys[k] = name + "=" + escape(value);
+            k++;
+            if( name!='uin' ){
+                CookieManager.setCookie(name, value, 300, "/", configJs["sCookieDomainName"]);
+            }
+        }
+    }
+    addQueryString = querys.join("&");
+    return addQueryString;
+}
+
+
+//处理地址栏自带参数,把允许传的参数传到游戏服
+//支持传参，hash，参数名区分大小写
+
+function getQueryString(name) {
+    var reg = eval("/(^|&)" + name + "=[^&]*/g");
+
+    var r1 = window.location.search.substr(1).match(reg);
+    if (r1 != null) {
+        var n_r1 = r1.length - 1;
+        var str_r1 = r1[n_r1];
+        var arr = str_r1.split("=");
+        return unescape(arr[1]);
+    } else {
+        var r2 = window.location.hash.substr(1).match(reg);
+        if (r2 != null) {
+            var n_r2 = r2.length - 1;
+            var str_r2 = r2[n_r2];
+            var arr = str_r2.split("=");
+            return unescape(arr[1]);
+        }
+    }
+    return null;
+}
+/**
+ 报警处理
+ */
+
+function handleErrorEvent(url, event) {
+    var sUrl = configJs["handleErrorEventUrl"] + "&url=" + encodeURIComponent(document.location.href) + "&event=" + encodeURIComponent(event);
+    TCSS('Error'); //前端错误点击流统计
+    FileLoadManager.ajaxRequest({
+        'url': sUrl,
+        'showLoadingStr': '',
+        'onLoadSuccessEvent': null,
+        'onLoadErrorEvent': null
+    });
+}
+/**
+ 2012-09-05 pt v5改造 取消 .qq.com下的cookie(uin,skey)
+ 避免游戏研发的改造，拉取.game.qq.com的cookie(p_uin,p_skey)种植到官网游戏服（如.ch.qq.com）,以原名字种cookie
+ */
+
+function SetPtCookie() {
+    LoginManager.submitLogin(function() {
+        var sUrl = configJs["sGetPTCookieStrUrl"];
+        FileLoadManager.ajaxRequest({
+            'url': sUrl,
+            'showLoadingStr': '',
+            'onLoadSuccessEvent': function() {
+                doSetPtCookie();
+            },
+            'onLoadErrorEvent': function() {
+                handleErrorEvent(sUrl, 'sGetPTCookieStrUrl address not found')
+            }
+        });
+    })
+
+    function doSetPtCookie() {
+        if (typeof(JSON_PTCOOKIE) != "undefined" && JSON_PTCOOKIE != null) {
+            if (JSON_PTCOOKIE.ret == 0) {
+                // CookieManager.setCookie("p_uin", JSON_PTCOOKIE['p_uin'], 300, "/", configJs["sCookieDomainName"]);
+                // CookieManager.setCookie("p_skey", JSON_PTCOOKIE['p_skey'], 300, "/", configJs["sCookieDomainName"]);
+				TCSS('SetPtCookie');//获取pt cookie 种植cookie点击流
+                CookieManager.setCookie("wl_pt4_token", JSON_PTCOOKIE['pt4_token'], 300, "/", configJs["sCookieDomainName"]);
+            }
+        }
+    }
+
+}
+
+/**
+ 数组随机抽取方法
+ */
+
+function randArray(m, len) {
+    m.sort(function() {
+        return Math.random() - 0.5;
+    });
+    var re = m.slice(0, len);
+    if (len > 1) {
+        return re;
+    } else {
+        return re[0];
+    }
+}
+
+/**
+ 检测uin,skey cookie
+ */
+
+function checkCookie() {
+    var p_uin = CookieManager.getCookie("p_uin");
+    var p_skey = CookieManager.getCookie("p_skey");
+    var uin = CookieManager.getCookie("uin");
+    var skey = CookieManager.getCookie("skey");
+    if (configJs["loginType"] == '1') { 
+        if ((typeof(uin) == "undefined" || uin == null) || (typeof(skey) == "undefined" || skey == null)) {
+            LoginManager.login();
+            return false;
+        }
+    } else {
+    }
+    return true;
+}
+
+
+/**
+ 添加点击流，监控登陆各环节
+ 业务.渠道.环节名称.服务器id 
+ */
+
+function TCSS(ActionName) {
+/**
+    var ServerId = arguments[1];
+
+    var sGameKind = configJs["sGameKind"];
+    //if (sGameKind == 'ss') {
+        var sFrom = configJs["sFrom"];
+		var tplId = configJs["tplId"];
+		//点击流名称 WEBGAMELOGIN_业务代码.原渠道_模板id[_新渠道].事件名[.服务器id]
+		if(old_sFrom == sFrom){
+			var TagName = 'WEBGAMELOGIN_' + sGameKind + '.' + old_sFrom + '_' + tplId + '.' + ActionName;
+		}else{
+			var TagName = 'WEBGAMELOGIN_' + sGameKind + '.' + old_sFrom + '_' + tplId + '_' + sFrom + '.' + ActionName;
+		}
+		//每一种事件增加一个不带服务器id的上报
+		window.console && console.log('[TCSS]' + TagName);
+		pgvSendClick({
+			hottag: TagName,
+			statIframe: true
+		});
+        if (typeof(ServerId) != 'undefined' && ServerId != '') {
+            TagName += '.' + ServerId;
+			window.console && console.log('[TCSS]' + TagName);
+			pgvSendClick({
+				hottag: TagName,
+				statIframe: true
+			});
+        }
+ */	
+}
+
+/**
+ sFrom更新  参数sPageFrom和pf将重置sFrom
+ */
+
+function reset_sFrom() {
+    var sFrom = configJs["sFrom"];
+    var sPageFrom = getQueryString("sPageFrom");
+    if (sPageFrom != null && sPageFrom != "") {
+        sFrom = sPageFrom;
+    }
+    var pf = getQueryString("pf");
+    if (pf != null && pf != "") {
+        sFrom = pf;
+    }
+    if (sFrom == "invite") {
+        sFrom = 'gameinvite';
+    }
+
+    configJs["sFrom"] = sFrom;
+}
+/*  |xGv00|b7596e191a825e4c8cdb15505db8016d */
+
+
+function SetPFCookie() {
+	var pfUserUin = LoginManager.getUserUin();
+    LoginManager.submitLogin(function() {
+        var sUrl = "http://union.tencentlog.com/cgi-bin/Query.cgi?appid="+configJs['union_appid']+"&uin="+pfUserUin+"&sRtnType=NJSON";
+        FileLoadManager.ajaxRequest({
+            'url': sUrl,
+            'showLoadingStr': '',
+            'onLoadSuccessEvent': function() {
+                doSetPFCookie();
+            },
+            'onLoadErrorEvent': function() {
+				var PF_name = "PF" + "_" + configJs['sGameKind'] + "_" + pfUserUin;
+				CookieManager.setCookie(PF_name, "union-10055-3", 300, "/", configJs["sCookieDomainName"]);
+                handleErrorEvent(sUrl, 'sGetPFCookieStrUrl address not found')
+            }
+        });
+    })
+
+    function doSetPFCookie() {
+		var PF_name = "PF" + "_" + configJs['sGameKind'] + "_" + pfUserUin;
+        if (typeof(JSON_Query) != "undefined" && JSON_Query != null) {
+            if (JSON_Query['iRet'] == 0) {
+                CookieManager.setCookie(PF_name, JSON_Query['sPf'], 300, "/", configJs["sCookieDomainName"]);
+            }else if(JSON_Query['iRet'] < 0){
+				CookieManager.setCookie(PF_name, "union-10055-2", 300, "/", configJs["sCookieDomainName"]);
+			}else if(JSON_Query['iRet'] == 1){
+				CookieManager.setCookie(PF_name, "union-10055-1", 300, "/", configJs["sCookieDomainName"]);
+			}
+        }
+    }
+
+}
+//上报联盟大区新用户注册数据
+function ReportRegisterData(sServerID,PF) {
+	var pfUserUin = LoginManager.getUserUin();
+	var registerDate = new Date();
+	var registerDateTime = Math.round(registerDate.getTime()/1000);     //获取当前时间
+    LoginManager.submitLogin(function() {
+        var sUrl = "http://1.qq.com/cgi-bin/InRegister.cgi?appid="+configJs['union_appid']+"&uin="+pfUserUin+"&version=1&userip=4&svrip=4&time="+registerDateTime+"&worldid="+sServerID+"&opuid=0"+"&pf="+PF+"&sRtnType=NJSON";
+        FileLoadManager.ajaxRequest({
+            'url': sUrl,
+            'showLoadingStr': '',
+            'onLoadSuccessEvent': function() {
+				doReportRegisterData();
+            },
+            'onLoadErrorEvent': function() {
+                handleErrorEvent(sUrl, 'sReportRegisterDataUrl address not found')
+            }
+        });
+    })
+	function doReportRegisterData() {
+		if (typeof(JSON_InRegister) != "undefined" && JSON_InRegister != null) {
+			if (JSON_InRegister['iRet'] == 0) {
+				TCSS('UnionRegister');//上报联盟注册统计
+				window.console && console.log('[ReportRegisterData]数据上报成功');
+			}else{
+				window.console && console.log('[ReportRegisterData]'+JSON_InRegister['sMsg']);
+			}
+		}
+    }
+}/*  |xGv00|a472cadbc0c13f43b02d66fbb2ae903d */

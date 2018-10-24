@@ -1,0 +1,813 @@
+//CookieManager 使用集合
+var CookieManager = {
+
+};
+
+//写入COOKIES
+CookieManager.setCookie = function(name,value,expiresd,path,domain,secure){
+	var expdate = new  Date();
+	var expires = arguments[2] || null;
+	var  path  =  arguments[3] || "/";
+	var  domain  =  arguments[4] || null;
+	var  secure  =  arguments[5] || false;
+	if(expires){
+		expdate.setMinutes(expdate.getMinutes() + parseInt(expires));
+	}
+	var cookietemp = escape(name) + '=' + escape(value) + (expires ? '; expires=' + expdate.toGMTString() : '') + (path ? '; path=' + path : '')+ (domain ? '; domain=' + domain : '')+(secure ? '; secure' : '');
+	document.cookie = cookietemp;
+};
+
+//读取COOKIE
+CookieManager.getCookie = function(name){
+	var arr,reg = new RegExp("(^| )"+name+"=([^;]*)(;|$)");
+	if(arr = document.cookie.match(reg)){
+		return unescape(arr[2]);
+	}else {
+		return '';
+	}
+};
+
+//删除COOKIE
+CookieManager.delCookie = function(name,path,domain,secure){
+	var exp = new Date(); 
+	exp.setTime(exp.getTime() - 1000);
+	var expires = exp.toGMTString();
+	var  path  =  arguments[1] || "/";
+	var  domain  =  arguments[2] || null;
+	var  secure  =  arguments[3] || false;
+	this.setCookie(name, '', -100, path, domain, secure);
+};
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+//关于地址栏中使用到的方法集合
+var URLManager = {
+
+};
+
+//为传入的地址添加随机数，避免缓存。
+URLManager.getNoCacheURL = function(url, ts){
+	url = url || ((window.location && window.location.href) ? window.location.href : '');
+	if(!url){
+		return '';
+	}
+	ts = ts || '_';
+	var tsStr = ts + "=" + (+new Date);
+	if(url.indexOf('?') < 0){
+		url += '?' + tsStr;
+		return url;
+	}
+	if(ts == '*' || ts == '|' || ts == '+' || ts == '^' || ts == '&'){
+		ts = '\\' + ts;
+	}
+	
+	var reg1 = new RegExp(ts + '=([^&]*)', 'g');
+	if(reg1.test(url)){
+		url = url.replace(new RegExp(ts + '=([^&]*)', 'g'), tsStr);//表示如果存在该变量则替换
+		return url;
+	}
+	url += "&" + tsStr;
+	return url;
+};
+
+//获取地址中的参数name 的值，第2个参数为空时表示当前页面的地址
+URLManager.getQuery = function(name, url){
+	var u  = url || window.location.href;
+	var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+	var r = u.substr(u.indexOf("\?")+1).match(reg);
+	if(!r){
+		return '';
+	}
+	var t = r[2] + '';
+	try{
+		t = decodeURIComponent(t);
+	}catch(e){}
+	return t;
+};
+
+//取得地址中所有参数列表。
+URLManager.getAllQuery = function(url){
+	url = url || window.location.href;
+	if(url == window.location.href){
+		url = url.split('#')[0];//当前页面链接可能出现http://www.baidu.com/?name=25###
+	}
+	var dataStr = url;
+	if(url.indexOf('\?') >= 0){//当前地址如果含有问号的情况，则一定会截取
+		dataStr = url.substr(url.indexOf("\?") + 1);
+	}
+
+	var mapParam = {};
+	if(!dataStr){
+		return mapParam;
+	}
+	var reg = /(^|&)([^=]+)=([^&]*)/img;
+	var result = dataStr.match(reg);
+	if(!result){
+		return mapParam;
+	}
+
+	for(var i = 0; i < result.length; i++){
+		var oneParam = result[i];
+		var parm = oneParam.replace(reg, '$2');
+		parm = parm.replace(/^(&){1}(.*)/g, '$2');
+		var resl = oneParam.replace(reg, '$3');
+		try{resl = decodeURIComponent(resl);/*解码处理*/}catch(e){}
+		if(parm){
+			mapParam[parm] = resl;
+		}
+	}
+	return mapParam;
+};
+
+/**
+ * 将参数的信息转换成字符串
+ * @param {Object} mapParam 需要添加的参数对象，如果newParam有同名的属性，则以mapParam的属性为主
+ */
+URLManager.getAllQueryStr = function(mapParam){
+	if(typeof(mapParam) != 'object' || !mapParam){
+		return '';
+	}
+	
+	var getURLString = function(key, value){
+		try{
+			key += '';
+			key = encodeURIComponent(key);
+			if(!key){
+				return '';
+			}
+		}catch(e){
+			return '';
+		}
+
+		if(typeof(value) == "undefined" ||
+			typeof(value) == 'function'){
+			return '';
+		}
+		
+		if(typeof(value) == "boolean"){
+			if(value){
+				key += '=1';
+			}else{
+				key += '=0';
+			}
+			return key;
+		}
+		
+		if(typeof(value) == "number" || typeof(value) == "string"){
+			key += "=" + encodeURIComponent(value + '');
+			return key;
+		}
+		
+		//对象
+		if(!value){//null
+			key += '=';
+			return key;
+		}
+		
+		if(value instanceof Array){
+			for(var k = 0; k < value.length; k++){
+				try{
+					value[k] = encodeURIComponent(value[k] + '');
+				}catch(e){}
+			}
+			key += '=' + (value.join('|'));
+			return key;
+		}else{
+			try{
+				key += '=' + encodeURIComponent(value + '');
+			}catch(e){return '';};
+			return key;
+		}
+		return '';
+	};
+
+	var arrStr_ = [];
+	for(var i in mapParam){
+		var temp = mapParam[i];
+		if(!i){
+			continue;
+		}
+
+		var _str = getURLString(i, temp);
+
+		if(!_str){
+			continue;
+		}
+		arrStr_.push(_str);
+	}
+	
+	if(arrStr_.length > 0){
+		return arrStr_.join("&");
+	}
+	
+	return '';
+};
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+//所有表单的方法
+var FormManager = {};
+FormManager._getContextDom = function(contextId){
+	var context = null;
+	if(typeof(contextId) == 'string'){
+		context = document.getElementById(contextId);
+	}else if(typeof(contextId) == 'object' && contextId){
+		context = contextId;
+	}	
+	if(!context){
+		context = document;
+	}
+	return context;
+};
+
+//取得所有表单值
+FormManager.getAllInputValue = function(contextId){
+	var _dom = FormManager._getContextDom(contextId);
+	
+	var submitData = {};
+	{//所有input框，checkbox,radio
+		var allInput = _dom.getElementsByTagName('input');
+		if(allInput.length > 0){
+			for(var i = 0; i < allInput.length; i++){
+				var tempDom = allInput[i];
+				var name_ = tempDom.getAttribute('name');
+				var value_ = tempDom.getAttribute('value') || tempDom.value || '';
+				
+				if(!name_){//先看是否包含name属性
+					continue;
+				}
+				
+				var type_ = tempDom.getAttribute('type');
+				if(!type_){
+					type_ = 'text';
+				}
+				type_ = type_.toLowerCase();
+				
+				{//如果为button
+					if(type_ == 'button'){
+						continue;
+					}
+				}
+	
+				{//如果为radio
+					if(type_ == 'radio'){
+						var checked_ = tempDom.getAttribute('checked') || tempDom.checked;
+						if(checked_){
+							submitData[name_] = value_;
+						}else{
+							if(typeof(submitData[name_]) == 'undefined'){
+								submitData[name_] = '';
+							}
+						}
+						continue;
+					}
+				}
+				
+				{//如果为checkbox
+					if(type_ == 'checkbox'){
+						if(typeof(submitData[name_]) == 'undefined'){
+							submitData[name_] = [];
+						}
+						
+						var checked_ = tempDom.getAttribute('checked') || tempDom.checked;
+						if(checked_){
+							submitData[name_].push(value_);
+						}
+						continue;
+					}
+				}
+				
+				//后面所有的都为text
+				submitData[name_] = value_;
+			}
+		}
+	}
+	
+	{//取得所有select框
+		var allSelect = _dom.getElementsByTagName('select');
+		if(allSelect.length > 0){
+			for(var i = 0; i < allSelect.length; i++){
+				var tempDom = allSelect[i];
+				var name_ = tempDom.getAttribute('name');
+				if(!name_){//先看是否包含name属性
+					continue;
+				}
+				var value_ = [];
+				var allOption = tempDom.getElementsByTagName('option');
+				for(var j = 0; j < allOption.length; j++){
+					var temp = allOption[j];
+					var select_ = temp.getAttribute('selected') || temp.selected;
+					var __value = temp.getAttribute('value') || temp.value || '';
+
+					if(select_){//存在select多选的情况
+						value_.push(__value);
+					}
+				}
+				if(value_.length == 0){
+					submitData[name_] = '';
+					continue;
+				}
+				if(value_.length == 1){//单选
+					submitData[name_] = value_[0];
+					continue;
+				}
+				submitData[name_] = value_;
+			}
+		}
+	}
+	
+	{//取得所有textarea框
+		var allTextarea = _dom.getElementsByTagName('textarea');
+		if(allTextarea.length > 0){
+			for(var i = 0; i < allTextarea.length; i++){
+				var tempDom = allTextarea[i];
+				var name_ = tempDom.getAttribute('name');
+				if(!name_){//先看是否包含name属性
+					continue;
+				}
+				
+				var value_ = tempDom.getAttribute('value') || tempDom.value || '';
+
+				submitData[name_] = value_;
+			}
+		}
+	}
+
+	return submitData;
+};
+
+//根据名字name取得表单值
+FormManager.getInputValueByName = function(name, contextId){
+	var allInputValue = FormManager.getAllInputValue(contextId);
+	return allInputValue[name] || '';
+};
+
+//修改时填充某Form ID下所有表单的值,结构不能太复杂
+/*eg:
+var json = {
+	text1 : 'abc',
+	text3 : '3',
+	text4 : ['5','6','7'],
+	text5 : '9',
+	text6 : 'uuuuuuuukkkkkk',
+	text7 : '10'
+};*/
+FormManager.setAllInputValue = function(json, contextId){
+	if(!json){
+		return false;
+	}
+	var _dom = FormManager._getContextDom(contextId);
+	
+	{//所有input框，checkbox,radio
+		var allInput = _dom.getElementsByTagName('input');
+		if(allInput.length > 0){
+			for(var i = 0; i < allInput.length; i++){
+				var tempDom = allInput[i];
+				var name_ = tempDom.getAttribute('name');
+				if(!name_){//先看是否包含name属性
+					continue;
+				}
+				if(typeof(json[name_]) == 'undefined'){
+					continue;
+				}
+				var value_ = json[name_];
+				
+				var type_ = tempDom.getAttribute('type');
+				if(!type_){
+					type_ = 'text';
+				}
+				type_ = type_.toLowerCase();
+				
+				{//如果为button
+					if(type_ == 'button'){
+						continue;
+					}
+				}
+	
+				{//如果为radio
+					if(type_ == 'radio'){
+						var value1_ = tempDom.getAttribute('value') || tempDom.value;
+
+						if(value1_ == value_){
+							tempDom.setAttribute('checked', 'checked');
+							tempDom.checked = 'checked';
+						}else{
+							tempDom.removeAttribute('checked');
+							tempDom.checked = '';
+						}
+						continue;
+					}
+				}
+				
+				{//如果为checkbox
+					if(type_ == 'checkbox'){
+						if(typeof(value_) == 'string'){
+							value_ = [value_];
+						}
+						var value1_ = tempDom.getAttribute('value');
+						value1_ = tempDom.value;
+						
+						var flag = false;
+						for(var j = 0; j < value_.length; j++){
+							var v_ = value_[j];
+							if(value1_ == v_){
+								tempDom.setAttribute('checked', 'checked');
+								tempDom.checked = 'checked';
+								
+								flag = true;
+								break;
+							}
+						}
+						if(!flag){
+							tempDom.removeAttribute('checked');
+							tempDom.checked = '';
+						}
+						continue;
+					}
+				}
+				
+				//后面所有的都为text
+				tempDom.setAttribute('value', value_);
+				tempDom.value = value_;
+			}
+		}
+	}
+	
+	
+	{//取得所有select框
+		var allSelect = _dom.getElementsByTagName('select');
+		if(allSelect.length > 0){
+			for(var i = 0; i < allSelect.length; i++){
+				var tempDom = allSelect[i];
+				var name_ = tempDom.getAttribute('name');
+				if(!name_){//先看是否包含name属性
+					continue;
+				}
+				if(typeof(json[name_]) == 'undefined'){
+					continue;
+				}
+				var value_ = json[name_];
+				if(typeof(value_) == 'string'){
+					value_ = [value_];
+				}
+
+				var allOption = tempDom.getElementsByTagName('option');
+				if(allOption.length == 0){
+					continue;
+				}
+				
+				var selFlag = false;
+				for(var j = 0; j < allOption.length; j++){
+					var temp = allOption[j];
+					var value1_ = temp.getAttribute('value');
+					value1_ = temp.value;
+
+					
+					var flag = false;
+					for(var k = 0; k < value_.length; k++){
+						var t = value_[k];
+						if(t == value1_){
+							if(ExplorerManager.isIE6){
+								setTimeout(function(){
+									temp.setAttribute('selected', 'selected');
+								}, 0);
+							}else{
+								temp.setAttribute('selected', 'selected');
+								temp.selected = 'selected';
+							}
+							flag = true;
+							selFlag = true;
+							break;
+						}
+					}
+					if(!flag){//存在select多选的情况
+						temp.removeAttribute('selected');
+						temp.selected = '';
+					}
+				}
+				
+				if(!selFlag){//如果一个都没选择的话
+					//如果是单选的话
+					var multiple = tempDom.getAttribute('multiple');
+					if(!multiple){
+						if(ExplorerManager.isIE6){
+							setTimeout(function(){
+								allOption[0].setAttribute('selected', 'selected');
+							}, 0);
+						}else{
+							allOption[0].setAttribute('selected', 'selected');
+							allOption[0].selected = 'selected';
+						}
+					}
+				}
+				
+			}
+		}
+	}
+	
+	{//取得所有textarea框
+		var allTextarea = _dom.getElementsByTagName('textarea');
+		if(allTextarea.length > 0){
+			for(var i = 0; i < allTextarea.length; i++){
+				var tempDom = allTextarea[i];
+				var name_ = tempDom.getAttribute('name');
+				if(!name_){//先看是否包含name属性
+					continue;
+				}
+				if(typeof(json[name_]) == 'undefined'){
+					continue;
+				}
+				tempDom.setAttribute('value', json[name_]);
+				tempDom.value = json[name_];
+			}
+		}
+	}
+	
+	return true;
+};
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * 设置浏览器的方法
+ */
+var ExplorerManager = {
+	
+};
+//浏览器添加到收藏夹
+ExplorerManager.addFavorite = function(url, title){
+	url = url || location.href;
+	title = title || document.title;
+	try{
+		if (window.sidebar){
+			window.sidebar.addPanel(title, url, '');
+		}else if(document.all){
+			window.external.AddFavorite(url, title);
+		}else if(window.opera && window.print){
+			return true;
+		}
+	}catch(e){
+		alert("您的浏览器安全设置不允许该项操作");
+	}
+};
+
+//浏览器判断属性。
+(function(){
+	var _explorStr = navigator.userAgent.toLowerCase();
+	ExplorerManager.isOpera = (_explorStr.indexOf("opera") != -1) ? true : false;
+	ExplorerManager.isTT = (_explorStr.indexOf('tencenttraveler') != -1) ? true : false;
+	ExplorerManager.isSafari = (_explorStr.indexOf("safari") != -1) ? true : false;
+	ExplorerManager.isFireFox = (_explorStr.indexOf("firefox") != -1) ? true : false;
+	ExplorerManager.isChrome = (_explorStr.indexOf("chrome") != -1) ? true : false;
+	
+	if(ExplorerManager.isOpera){
+		ExplorerManager.isIE = ExplorerManager.isIE6 = ExplorerManager.isIE7 = ExplorerManager.isIE8 = ExplorerManager.isGecko = false;
+	}else{
+		ExplorerManager.isIE = (_explorStr.indexOf("msie") != -1) ? true : false;
+		ExplorerManager.isIE6 = (_explorStr.indexOf("msie 6") != -1) ? true : false;
+		ExplorerManager.isIE7 = (_explorStr.indexOf("msie 7") != -1) ? true : false;
+		ExplorerManager.isIE8 = (_explorStr.indexOf("msie 8") != -1) ? true : false;
+		ExplorerManager.isIE9 = (_explorStr.indexOf("msie 9") != -1) ? true : false;
+
+		if(ExplorerManager.isSafari){
+			ExplorerManager.isGecko = false;
+		}else{
+			ExplorerManager.isGecko = (_explorStr.indexOf("gecko") != -1) ? true : false;
+		}
+	}
+})();
+
+//剪贴板的复制方法。
+ExplorerManager.clipDataToBoard = function(txt){
+	if(window.clipboardData){
+		clipboardData.setData("text",txt);
+		return true;
+	}
+	
+	if(window.netscape){
+		try {
+			netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect");
+		} catch (e) {    
+			alert("被浏览器拒绝！\n请在浏览器地址栏输入'about:config'并回车\n然后将'signed.applets.codebase_principal_support'设置为'true'");
+		}    
+		var clip = Components.classes['@mozilla.org/widget/clipboard;1'].createInstance(Components.interfaces.nsIClipboard);
+		if (!clip){
+			return false;
+		}
+		var trans = Components.classes['@mozilla.org/widget/transferable;1'].createInstance(Components.interfaces.nsITransferable);
+		if (!trans){
+			return false;
+		}
+		trans.addDataFlavor('text/unicode');
+		var str = new Object();
+		var len = new Object();
+		var str = Components.classes["@mozilla.org/supports-string;1"].createInstance(Components.interfaces.nsISupportsString);
+		var copytext = txt;
+		str.data = copytext;
+		trans.setTransferData("text/unicode",str,copytext.length*2);
+		var clipid = Components.interfaces.nsIClipboard;
+		if (!clip){
+			return false;
+		}
+		clip.setData(trans,null,clipid.kGlobalClipboard);
+		return true;
+	}
+	return false;
+};
+
+
+
+
+/*
+ * 事件管理
+ */
+EventManager = function(){
+	
+};
+
+//Dom对象可以绑定和解绑定事件
+EventManager.bind = function(oTarget, sEventType, fnHandler){
+	//IE和FF的兼容性处理 
+	if(oTarget.addEventListener){//如果是FF
+		oTarget.addEventListener(sEventType,fnHandler,false);
+	}else if(oTarget.attachEvent){//如果是IE
+		oTarget.attachEvent('on'+sEventType,fnHandler);
+	} else{
+		oTarget['on'+sEventType] = fnHandler;
+	}
+	return true;
+};
+EventManager.unbind = function(oTarget, sEventType, fnHandler){
+	if(oTarget.removeEventListener) {//如果是FF
+		oTarget.removeEventListener(sEventType,fnHandler,false);
+	}else if(oTarget.detachEvent) {//如果是IE
+		oTarget.detachEvent('on' + sEventType,fnHandler);
+	}else{
+		oTarget['on'+sEventType] = null;
+	}
+	return true;
+};
+//获取event事件
+EventManager.getEvent = function(){
+	if(document.all){
+		return window.event;
+	}
+	var func = EventManager.getEvent.caller;
+	//循环找到传入event的函数，例如onkeydown()，即使没有写，第一个默认参数就是event
+	while(func != null){
+		var A = func.arguments[0];
+		if(A){
+			if((A.constructor == Event || A.constructor == MouseEvent) || (typeof(A)=="object" && A.preventDefault && A.stopPropagation)){
+				return A;
+			}
+		};
+		func=func.caller;
+	}
+	return null;
+};
+
+
+
+
+/*
+ * 样式管理
+ */
+StyleManager = function(){
+	
+};
+
+StyleManager.getStyle = function(element, styleName){
+	var _camelize = function(str){
+		if(str == 'float'){
+			return typeof(element.style.styleFloat) != 'undefined' ? 'styleFloat' : 'cssFloat';
+		}
+		return str.replace(/\-(\w)/ig, function(B, A){
+			return A.toUpperCase();
+		});
+	};
+
+	var value = element.style[_camelize(styleName)];
+	if (!value) {   
+		if(document.defaultView && document.defaultView.getComputedStyle){   
+			var css = document.defaultView.getComputedStyle(element, null);   
+			value = css ? css.getPropertyValue(styleName) : null;   
+		} else if (element.currentStyle) {   
+			value = element.currentStyle[_camelize(styleName)];   
+		}   
+	}
+	return value;
+};
+StyleManager.setStyle = function(element, styleObj){
+	var _camelize = function(str){
+		return str.replace(/\-(\w)/ig, function(B, A){
+			return A.toUpperCase();
+		});
+	};
+	var pixelStyles = /^(top|left|bottom|right|width|height|borderWidth)$/;
+
+	var _explorStr = navigator.userAgent.toLowerCase();
+	var isOpera = (_explorStr.indexOf("opera") != -1) ? true : false;
+	var isIE = (!isOpera) && ((_explorStr.indexOf("msie") != -1) ? true : false);
+	
+	var setOneStyle = function(e, na, v){
+		na = _camelize(na);
+		var s = e.style;
+		if(pixelStyles.test(na) && (typeof(v) == 'number' || /^[\-0-9\.]+$/.test(v))){
+			v += 'px';
+		}
+		if(na == 'opacity'){
+			if(isIE){
+				s.filter = (v === '') ? '' : "alpha(opacity=" + v + ")";
+				if (!e.currentStyle || !e.currentStyle.hasLayout){
+					s.display = 'inline-block';
+				}
+				return true;
+			}
+			s['opacity'] = s['-moz-opacity'] = s['-khtml-opacity'] = (v / 100) || '';
+			return true;
+		}
+
+		if(na == 'float'){
+			if(isIE){
+				s.styleFloat = v;
+			}else{
+				s.cssFloat = v;
+			}
+			return true;
+		}
+		
+		s[na] = v || '';
+		return true;
+	};
+
+	for(var i in styleObj){
+		if(i){
+			setOneStyle(element, i, styleObj[i]);
+		}
+	}
+	return true;
+};
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+//获取页面中对象的绝对X位置
+var getX = function(e){
+	var t = e.offsetLeft;
+	while(e = e.offsetParent){
+		t += e.offsetLeft;
+	}
+	return t;
+};
+//获取页面中对象的绝对Y位置
+var getY = function(e){
+	var t = e.offsetTop;
+	while(e = e.offsetParent){
+		t += e.offsetTop;
+	}
+	return t;
+};
+
+//解决在IE6下js文件不加载的问题。
+var reloadPageInIE6 = function(){
+	var _isIE6 = ((navigator.userAgent.toLowerCase()).indexOf("msie 6") != -1) ? true : false;
+	if(!_isIE6){
+		return;
+	}
+	var _getQuery = function(){
+		var u  = window.location.href;
+		var reg = new RegExp("(^|&)_=([^&]*)(&|$)");
+		var r = u.substr(u.indexOf("\?")+1).match(reg);
+		if (r != null){
+			return decodeURIComponent(r[2].toString());
+		} 
+		return '';
+	};
+	var _oldtime = _getQuery();
+	if(_oldtime){
+		_oldtime = _oldtime.toString().replace(/[^\d]/gi, '');
+		var _lentime = (new Date().getTime() * 1 - _oldtime * 1) / 60000;
+		_lentime = parseInt(_lentime, 10);
+		if(_lentime >= 0 && _lentime <= 10){//相隔时间如果为10分钟内，不用页面刷新
+			return;
+		}
+	}
+	location.href = function(){
+		var url = window.location.href;
+		var tsStr = '_=' + new Date().getTime();
+		if(url.indexOf("?") > 0){
+			var _value = _getQuery();
+			if(_value){
+				url = url.replace(new RegExp('_=([^&]*)', 'gi'), tsStr);//表示如果存在该变量则替换
+			}else{
+				url += "&" + tsStr;
+			}
+		}else{
+			url += "?" + tsStr;
+		}
+		return url;
+	}();
+};
+
+
+
+/*  |xGv00|a560706599e128b71f0902ceb9834cd6 */

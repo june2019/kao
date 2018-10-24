@@ -1,0 +1,7 @@
+/**大区与服务器的关系,大区id对应一组服务器id*/
+JSON_server_sPeopleStatus = {
+
+};
+
+/**[IP推荐]双线服务器*/
+JSON_Crewel_iServerId = 4448;/*  |xGv00|89634726bf1bd5a981d168739cdb34a8 */

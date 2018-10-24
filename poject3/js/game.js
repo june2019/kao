@@ -1,4 +1,5 @@
 $(function(){
+alert('123');
 	//提示变量
 	let help = 0;
 
